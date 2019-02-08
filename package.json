@@ -1,7 +1,7 @@
 {
 	"name": "run-on-save",
 	"displayName": "Run Commands on File Save",
-	"description": "Run shell commands when a file is saved in vscode.",
+	"description": "Run configured shell commands on a file is saved in vscode.",
 	"version": "1.0.0",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save/",
