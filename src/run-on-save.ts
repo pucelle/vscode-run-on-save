@@ -13,7 +13,7 @@ export interface Command {
 	notMatch: string
 	command: string
 	runningStatusMessage: string
-	finishedStatusMessage: string
+	finishStatusMessage: string
 }
 
 interface CompiledCommand {
@@ -21,13 +21,13 @@ interface CompiledCommand {
 	notMatch?: RegExp
 	command: string
 	runningStatusMessage: string
-	finishedStatusMessage: string
+	finishStatusMessage: string
 }
 
 interface CommandToRun {
 	command: string
 	runningStatusMessage: string
-	finishedStatusMessage: string
+	finishStatusMessage: string
 }
 
 
@@ -39,13 +39,13 @@ export class CommandManager {
 	}
 
 	private compileCommands(commands: Command[]) {
-		this.commands = commands.map(({match, notMatch, command, runningStatusMessage, finishedStatusMessage}) => {
+		this.commands = commands.map(({match, notMatch, command, runningStatusMessage, finishStatusMessage}) => {
 			return <CompiledCommand>{
 				match: match ? new RegExp(match, 'i') : undefined,
 				notMatch: notMatch ? new RegExp(notMatch, 'i') : undefined,
 				command,
 				runningStatusMessage: runningStatusMessage,
-				finishedStatusMessage: finishedStatusMessage,
+				finishStatusMessage: finishStatusMessage,
 			}
 		})
 	}
@@ -53,11 +53,11 @@ export class CommandManager {
 	public prepareCommandsForFile (fileName: string): CommandToRun[] {
 		let filteredCommands = this.filterCommandsForFile(fileName)
 		
-		let formattedCommands = filteredCommands.map(({ command, runningStatusMessage, finishedStatusMessage }) => {
+		let formattedCommands = filteredCommands.map(({ command, runningStatusMessage, finishStatusMessage }) => {
 			return <CommandToRun>{
 				command: path.normalize(this.formatVariables(command, fileName)),
 				runningStatusMessage: this.formatVariables(runningStatusMessage, fileName),
-				finishedStatusMessage: this.formatVariables(finishedStatusMessage, fileName),
+				finishStatusMessage: this.formatVariables(finishStatusMessage, fileName),
 			}
 		})
 
@@ -152,7 +152,7 @@ export class RunOnSaveExtension {
 	}
 
 	private runCommands(commands: CommandToRun[]) {
-		for (let {command, runningStatusMessage, finishedStatusMessage} of commands) {
+		for (let {command, runningStatusMessage, finishStatusMessage} of commands) {
 			this.showChannelMessage(`Running "${command}"`)
 
 			if (runningStatusMessage) {
@@ -164,8 +164,8 @@ export class RunOnSaveExtension {
 			child.stderr.on('data', data => this.channel.append(data.toString()))
 			
 			child.on('exit', (e) => {
-				if (e === 0 && finishedStatusMessage) {
-					this.showStatusMessage(finishedStatusMessage)
+				if (e === 0 && finishStatusMessage) {
+					this.showStatusMessage(finishStatusMessage)
 				}
 
 				if (e !== 0) {

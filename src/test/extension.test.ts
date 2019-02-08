@@ -16,7 +16,7 @@ suite("Extension Tests", () => {
 		"notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.scss$",
 		"command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
 		"runningStatusMessage": "Compiling ${fileBasename}",
-		"finishedStatusMessage": "${fileBasename} compiled",
+		"finishStatusMessage": "${fileBasename} compiled",
 	}])
 
 	test('will compile scss file', function () {
@@ -24,7 +24,7 @@ suite("Extension Tests", () => {
 		assert.deepStrictEqual(commands, [{
 			"command": path.normalize("node-sass folderName/fileName.scss folderName/fileName.css"),
 			"runningStatusMessage": "Compiling fileName.scss",
-			"finishedStatusMessage": "fileName.scss compiled",
+			"finishStatusMessage": "fileName.scss compiled",
 		}])
 	})
 
