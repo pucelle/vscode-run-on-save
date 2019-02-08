@@ -118,7 +118,9 @@ export class RunOnSaveExtension {
 	
 
 	private showEnablingChannelMessage () {
-		this.showChannelMessage(`Run On Save is ${this.getEnabled() ? 'enabled' : 'disabled'}.`)
+		let message = `Run On Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
+		this.showChannelMessage(message)
+		this.showStatusMessage(message)
 	}
 
 	private showChannelMessage(message: string) {
