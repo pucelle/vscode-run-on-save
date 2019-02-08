@@ -35,7 +35,7 @@ Add "runOnSave" configuration to user or workspace settings.
       "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.scss$",
       "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
       "runningStatusMessage": "Compiling ${fileBasename}",
-      "finishedStatusMessage": "${fileBasename} compiled",
+      "finishStatusMessage": "${fileBasename} compiled",
     }
   ]
 }
