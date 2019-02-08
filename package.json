@@ -4,7 +4,7 @@
 	"description": "Run shell commands when a file is saved in vscode.",
 	"version": "1.0.0",
 	"publisher": "pucelle",
-	"homepage": "https://github.com/pucelle/vscode-run-on-save/blob/master/README.md",
+	"homepage": "https://github.com/pucelle/vscode-run-on-save/",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pucelle/vscode-run-on-save.git"

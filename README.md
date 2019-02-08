@@ -1,11 +1,11 @@
-## Run shell command when file is saved
+## Run shell commands when file is saved
 
 Based on [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave).
 
 
 ## Features
 
-- Configure multiple shell commands which will execute when a matched files is saved.
+- Configure multiple shell commands which will execute when a matched file is saved.
 - You can also specify status bar messages before and after commands executing, such that it will never distrub coding. If you prefer showing message in terminal, choose [Save And Run](https://github.com/wk-j/vscode-save-and-run).
 
 
