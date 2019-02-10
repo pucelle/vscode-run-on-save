@@ -3,11 +3,6 @@ import * as path from 'path'
 import { exec } from 'child_process'
 
 
-interface Config {
-	statusMessageTimeout: number
-	commands: Command[]
-}
-
 export interface Command {
 	match: string
 	notMatch: string
@@ -100,8 +95,8 @@ export class CommandManager {
 export class RunOnSaveExtension {
 	private channel: vscode.OutputChannel
 	private context: vscode.ExtensionContext
-	private config: Config
 	private commandManager: CommandManager
+	private config: any
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
@@ -112,11 +107,11 @@ export class RunOnSaveExtension {
 	}
 
 	public loadConfig() {
-		this.config = <Config><any>vscode.workspace.getConfiguration('runOnSave')
-		this.commandManager.setCommands(this.config.commands)
+		this.config = vscode.workspace.getConfiguration('runOnSave')
+		console.log(this.config.get('commands'))
+		this.commandManager.setCommands(<Command[]><any>this.config.get('commands') || [])
 	}
 	
-
 	private showEnablingChannelMessage () {
 		let message = `Run On Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
 		this.showChannelMessage(message)
@@ -137,7 +132,7 @@ export class RunOnSaveExtension {
 	}
 
 	private showStatusMessage(message: string): vscode.Disposable {
-		return vscode.window.setStatusBarMessage(message, this.config.statusMessageTimeout || 3000)
+		return vscode.window.setStatusBarMessage(message, <number><any>this.config.get('statusMessageTimeout') || 3000)
 	}
 
 	public onDocumentSave(document: vscode.TextDocument) {

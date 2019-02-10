@@ -3,7 +3,7 @@
 	"displayName": "Run Commands on File Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
 	"repository": {
@@ -40,45 +40,42 @@
 			"title": "Run On Save",
 			"type": "object",
 			"properties": {
-				"runOnSave": {
-					"type": "object",
-					"properties": {
-						"statusMessageTimeout": {
-							"type": "number",
-							"description": "Sepcify the timeout in millisecond after which the status message will be hidden",
-							"default": 3000
-						},
-						"commands": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"match": {
-										"type": "string",
-										"description": "Specify RegExp source to match whole file path. eg. \"\\.scss$\" to match scss files",
-										"default": ""
-									},
-									"notMatch": {
-										"type": "string",
-										"description": "Specify RegExp source to match whole file path for files which will not execute the command. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" to exclude _*.scss",
-										"default": ""
-									},
-									"command": {
-										"type": "string",
-										"description": "Specify the shell command to execute",
-										"default": "echo ${file}"
-									},
-									"runningStatusMessage": {
-										"type": "string",
-										"description": "Specify the status bar message when the shell command began to execute",
-										"default": ""
-									},
-									"finishStatusMessage": {
-										"type": "string",
-										"description": "Specify the status bar message after the shell command finished executing",
-										"default": ""
-									}
-								}
+				"runOnSave.statusMessageTimeout": {
+					"type": "number",
+					"description": "Sepcify the timeout in millisecond after which the status message will be hidden",
+					"default": 3000
+				},
+				"runOnSave.commands": {
+					"type": "array",
+					"description": "Sepcify the shell commands to execute",
+					"default": [],
+					"items": {
+						"type": "object",
+						"properties": {
+							"match": {
+								"type": "string",
+								"description": "Specify RegExp source to match whole file path. eg. \"\\.scss$\" to match scss files",
+								"default": ""
+							},
+							"notMatch": {
+								"type": "string",
+								"description": "Specify RegExp source to match whole file path for files which will not execute the command. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" to exclude _*.scss",
+								"default": ""
+							},
+							"command": {
+								"type": "string",
+								"description": "Specify the shell command to execute",
+								"default": "echo ${file}"
+							},
+							"runningStatusMessage": {
+								"type": "string",
+								"description": "Specify the status bar message when the shell command began to execute",
+								"default": ""
+							},
+							"finishStatusMessage": {
+								"type": "string",
+								"description": "Specify the status bar message after the shell command finished executing",
+								"default": ""
 							}
 						}
 					}
