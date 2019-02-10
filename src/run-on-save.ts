@@ -108,7 +108,6 @@ export class RunOnSaveExtension {
 
 	public loadConfig() {
 		this.config = vscode.workspace.getConfiguration('runOnSave')
-		console.log(this.config.get('commands'))
 		this.commandManager.setCommands(<Command[]><any>this.config.get('commands') || [])
 	}
 	
