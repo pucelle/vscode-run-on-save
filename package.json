@@ -5,7 +5,7 @@
 	"icon": "images/logo.png",
 	"version": "1.0.2",
 	"publisher": "pucelle",
-	"homepage": "https://github.com/pucelle/vscode-run-on-save/",
+	"homepage": "https://github.com/pucelle/vscode-run-on-save",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pucelle/vscode-run-on-save.git"
