@@ -27,17 +27,17 @@ Add "runOnSave" configuration to user or workspace settings.
 ## Sample Config
 
 ```json
-"runOnSave": {
-  "statusMessageTimeout": 3000,
-  "commands": [
-    {
-      "match": ".*\\.scss$",
-      "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.scss$",
-      "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
-      "runningStatusMessage": "Compiling ${fileBasename}",
-      "finishStatusMessage": "${fileBasename} compiled",
-    }
-  ]
+{
+    "runOnSave.statusMessageTimeout": 3000,
+    "runOnSave.commands": [
+        {
+            "match": ".*\\.scss$",
+            "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.scss$",
+            "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
+            "runningStatusMessage": "Compiling ${fileBasename}",
+            "finishStatusMessage": "${fileBasename} compiled",
+        }
+    ]
 }
 ```
 
