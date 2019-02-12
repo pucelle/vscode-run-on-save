@@ -42,39 +42,39 @@
 			"properties": {
 				"runOnSave.statusMessageTimeout": {
 					"type": "number",
-					"description": "Sepcify the timeout in millisecond after which the status message will be hidden",
+					"description": "Sepcify the timeout in millisecond after which the status message will be hidden.",
 					"default": 3000
 				},
 				"runOnSave.commands": {
 					"type": "array",
-					"description": "Shell commands array",
+					"description": "Shell commands array.",
 					"default": [],
 					"items": {
 						"type": "object",
 						"properties": {
 							"match": {
 								"type": "string",
-								"description": "Specify a RegExp source to match file path. eg. \"\\.scss$\" can used to match scss files",
+								"description": "Specify a RegExp source to match file path. eg. \"\\.scss$\" can used to match scss files.",
 								"default": ""
 							},
 							"notMatch": {
 								"type": "string",
-								"description": "Specify a RegExp source, the files whole path match it will be excluded. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files",
+								"description": "Specify a RegExp source, the files whole path match it will be excluded. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files.",
 								"default": ""
 							},
 							"command": {
 								"type": "string",
-								"description": "Specify the shell command string",
+								"description": "Specify the shell command string.",
 								"default": "echo ${file}"
 							},
 							"runningStatusMessage": {
 								"type": "string",
-								"description": "Specify the status bar message when the shell command began to execute",
+								"description": "Specify the status bar message when the shell command began to execute.",
 								"default": ""
 							},
 							"finishStatusMessage": {
 								"type": "string",
-								"description": "Specify the status bar message after the shell command finished executing",
+								"description": "Specify the status bar message after the shell command finished executing.",
 								"default": ""
 							}
 						}
