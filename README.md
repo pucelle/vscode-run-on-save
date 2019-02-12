@@ -13,15 +13,19 @@ Based on [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave).
 
 ## Configuration
 
-Add "runOnSave" configuration to user or workspace settings.
+### Normal Configuration
 
-- "statusMessageTimeout": Specify the timeout millisecond after which the status bar message will be hidden, default value is 3000.
-- "commands" - Specify the array of shell commands to be executed after file is saved.
-- "command.match" - Specify RegExp source to match whole file path. eg. \"\\.scss$\" to match scss files.
-- "command.notMatch" - Specify RegExp source to match whole file path for files which will not execute the command. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" to exclude _*.scss.
-- "command.command" - Specify the shell command to execute. You can include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
-- "command.runningStatusMessage" - Specify the status bar message when the shell command began to execute, also supports variable substitution.
-- "command.finishStatusMessage" - Specify the status bar message after the shell command finished executing, also supports variable substitution.
+- "runOnSave.statusMessageTimeout": Specify the timeout millisecond after which the status bar message will be hidden, default value is 3000.
+- "runOnSave.commands" - Specify the array of shell commands to be executed after file is saved, its items as below.
+
+
+### Command Item Configuration
+
+- "match" - Specify a RegExp source to match file path. eg. \"\\.scss$\" can used to match scss files.
+- "notMatch" - Specify a RegExp source, the files whole path match it will be excluded. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files.
+- "command" - Specify the shell command to execute. You can include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
+- "runningStatusMessage" - Specify the status bar message when the shell command began to execute, also supports variable substitution.
+- "finishStatusMessage" - Specify the status bar message after the shell command finished executing, also supports variable substitution.
 
 
 ## Sample Config

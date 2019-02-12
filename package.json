@@ -4,6 +4,7 @@
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
 	"version": "1.0.4",
+	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
 	"repository": {
@@ -13,7 +14,6 @@
 	"bugs": {
 		"url": "https://github.com/pucelle/vscode-run-on-save/issues"
 	},
-	"license": "MIT",
 	"engines": {
 		"vscode": "^1.30.0"
 	},
@@ -47,24 +47,24 @@
 				},
 				"runOnSave.commands": {
 					"type": "array",
-					"description": "Sepcify the shell commands to execute",
+					"description": "Shell commands array",
 					"default": [],
 					"items": {
 						"type": "object",
 						"properties": {
 							"match": {
 								"type": "string",
-								"description": "Specify RegExp source to match whole file path. eg. \"\\.scss$\" to match scss files",
+								"description": "Specify a RegExp source to match file path. eg. \"\\.scss$\" can used to match scss files",
 								"default": ""
 							},
 							"notMatch": {
 								"type": "string",
-								"description": "Specify RegExp source to match whole file path for files which will not execute the command. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" to exclude _*.scss",
+								"description": "Specify a RegExp source, the files whole path match it will be excluded. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files",
 								"default": ""
 							},
 							"command": {
 								"type": "string",
-								"description": "Specify the shell command to execute",
+								"description": "Specify the shell command string",
 								"default": "echo ${file}"
 							},
 							"runningStatusMessage": {
