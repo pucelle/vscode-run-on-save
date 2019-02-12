@@ -54,12 +54,12 @@
 						"properties": {
 							"match": {
 								"type": "string",
-								"description": "Specify a RegExp source to match file path. eg. \"\\.scss$\" can used to match scss files.",
+								"description": "Specify a RegExp source to match file path. e.g., \"\\.scss$\" can used to match scss files.",
 								"default": ""
 							},
 							"notMatch": {
 								"type": "string",
-								"description": "Specify a RegExp source, the files whole path match it will be excluded. eg. \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files.",
+								"description": "Specify a RegExp source, the files whole path match it will be excluded. e.g., \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files.",
 								"default": ""
 							},
 							"command": {
