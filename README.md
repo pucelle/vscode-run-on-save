@@ -13,8 +13,6 @@ Based on [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave).
 
 ## Configuration
 
-### Normal Configuration
-
 - "runOnSave.statusMessageTimeout": Specify the timeout millisecond after which the status bar message will be hidden, default value is 3000.
 - "runOnSave.commands" - Specify the array of shell commands to be executed after file is saved, its items as below.
 
@@ -28,7 +26,7 @@ Based on [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave).
 - "finishStatusMessage" - Specify the status bar message after the shell command finished executing, also supports variable substitution.
 
 
-## Sample Config
+### Sample Configuration
 
 ```json
 {
@@ -46,7 +44,7 @@ Based on [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave).
 ```
 
 
-## Variable Substitution
+### Variable Substitution
 
 For more details please refer to [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
 
