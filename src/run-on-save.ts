@@ -96,7 +96,7 @@ export class RunOnSaveExtension {
 	private channel: vscode.OutputChannel
 	private context: vscode.ExtensionContext
 	private commandManager: CommandManager
-	private config: any
+	private config: vscode.WorkspaceConfiguration
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
@@ -108,7 +108,7 @@ export class RunOnSaveExtension {
 
 	public loadConfig() {
 		this.config = vscode.workspace.getConfiguration('runOnSave')
-		this.commandManager.setCommands(<Command[]><any>this.config.get('commands') || [])
+		this.commandManager.setCommands(<Command[]>this.config.get('commands') || [])
 	}
 	
 	private showEnablingChannelMessage () {
@@ -131,7 +131,7 @@ export class RunOnSaveExtension {
 	}
 
 	private showStatusMessage(message: string): vscode.Disposable {
-		return vscode.window.setStatusBarMessage(message, <number><any>this.config.get('statusMessageTimeout') || 3000)
+		return vscode.window.setStatusBarMessage(message, <number>this.config.get('statusMessageTimeout') || 3000)
 	}
 
 	public onDocumentSave(document: vscode.TextDocument) {
