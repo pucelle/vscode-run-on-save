@@ -130,8 +130,8 @@ export class RunOnSaveExtension {
 		this.showEnablingChannelMessage()
 	}
 
-	private showStatusMessage(message: string): vscode.Disposable {
-		return vscode.window.setStatusBarMessage(message, <number>this.config.get('statusMessageTimeout') || 3000)
+	private showStatusMessage(message: string) {
+		vscode.window.setStatusBarMessage(message, <number>this.config.get('statusMessageTimeout') || 3000)
 	}
 
 	public onDocumentSave(document: vscode.TextDocument) {
