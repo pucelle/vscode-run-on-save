@@ -3,7 +3,7 @@
 	"displayName": "Run Commands on File Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -20,7 +20,12 @@
 	"categories": [
 		"Other"
 	],
-	"keywords": ["run on save", "save and run", "compile scss on save", "compile less on save"],
+	"keywords": [
+		"run on save",
+		"save and run",
+		"compile scss on save",
+		"compile less on save"
+	],
 	"activationEvents": [
 		"*"
 	],
@@ -42,7 +47,7 @@
 			"properties": {
 				"runOnSave.statusMessageTimeout": {
 					"type": "number",
-					"description": "Sepcify the timeout in millisecond after which the status message will be hidden.",
+					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Only works when runIn=backend.",
 					"default": 3000
 				},
 				"runOnSave.commands": {
@@ -67,14 +72,27 @@
 								"description": "Specify the shell command string.",
 								"default": "echo ${file}"
 							},
+							"runIn": {
+								"type": "string",
+								"description": "Run command in.",
+								"enum": [
+									"backend",
+									"terminal"
+								],
+								"default": "backend",
+								"enumDescriptions": [
+									"Run command silently and output messages to output channel, you can specify runningStatusMessage and finishStatusMessage to give you feekback. Choose this when you don't want to be disturbed.",
+									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback."
+								]
+							},
 							"runningStatusMessage": {
 								"type": "string",
-								"description": "Specify the status bar message when the shell command began to execute.",
+								"description": "Specify the status bar message when the shell command began to run. Only works when runIn=backend.",
 								"default": ""
 							},
 							"finishStatusMessage": {
 								"type": "string",
-								"description": "Specify the status bar message after the shell command finished executing.",
+								"description": "Specify the status bar message after the shell command finished executing. Only works when runIn=backend.",
 								"default": ""
 							}
 						}
@@ -91,10 +109,10 @@
 		"test": "npm run compile && node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
-		"typescript": "^3.1.4",
-		"vscode": "^1.1.25",
+		"@types/mocha": "^2.2.42",
+		"@types/node": "^8.10.40",
 		"tslint": "^5.8.0",
-		"@types/node": "^8.10.25",
-		"@types/mocha": "^2.2.42"
+		"typescript": "^3.3.3",
+		"vscode": "^1.1.29"
 	}
 }

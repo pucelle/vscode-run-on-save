@@ -1,65 +1,86 @@
-import * as vscode from 'vscode'
 import * as path from 'path'
-import { exec } from 'child_process'
+import {exec} from 'child_process'
+import * as vscode from 'vscode'
 
 
-export interface Command {
+export interface Configuration {
+	statusMessageTimeout: number
+	commands: OriginalCommand
+}
+
+export interface OriginalCommand {
 	match: string
 	notMatch: string
 	command: string
+	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
 }
 
-interface CompiledCommand {
+export interface ProcessedCommand {
 	match?: RegExp
 	notMatch?: RegExp
 	command: string
+	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
 }
 
-interface CommandToRun {
+export interface BackendCommand {
+	runIn: 'backend'
 	command: string
 	runningStatusMessage: string
 	finishStatusMessage: string
 }
 
+export interface TerminalCommand {
+	runIn: 'terminal'
+	command: string
+}
 
-export class CommandManager {
-	private commands: CompiledCommand[]
+
+export class CommandProcessor {
+	private commands: ProcessedCommand[]
 	
-	public setCommands (commands: Command[]) {
-		this.compileCommands(commands)
+	public setOriginalCommands (commands: OriginalCommand[]) {
+		this.commands = this.processCommands(commands)
 	}
 
-	private compileCommands(commands: Command[]) {
-		this.commands = commands.map(({match, notMatch, command, runningStatusMessage, finishStatusMessage}) => {
-			return <CompiledCommand>{
-				match: match ? new RegExp(match, 'i') : undefined,
-				notMatch: notMatch ? new RegExp(notMatch, 'i') : undefined,
-				command,
-				runningStatusMessage: runningStatusMessage,
-				finishStatusMessage: finishStatusMessage,
-			}
+	private processCommands(commands: OriginalCommand[]): ProcessedCommand[] {
+		return commands.filter(command => command.command).map(command => {
+			command.runIn = command.runIn || 'backend'
+
+			return Object.assign({}, command, {
+				match: command.match ? new RegExp(command.match, 'i') : undefined,
+				notMatch: command.notMatch ? new RegExp(command.notMatch, 'i') : undefined
+			})
 		})
 	}
 
-	public prepareCommandsForFile (fileName: string): CommandToRun[] {
+	public prepareCommandsForFile (fileName: string): (BackendCommand | TerminalCommand)[] {
 		let filteredCommands = this.filterCommandsForFile(fileName)
 		
-		let formattedCommands = filteredCommands.map(({ command, runningStatusMessage, finishStatusMessage }) => {
-			return <CommandToRun>{
-				command: path.normalize(this.formatVariables(command, fileName)),
-				runningStatusMessage: this.formatVariables(runningStatusMessage, fileName),
-				finishStatusMessage: this.formatVariables(finishStatusMessage, fileName),
+		let formattedCommands = filteredCommands.map((command) => {
+			if (command.runIn === 'backend') {
+				return <BackendCommand>{
+					runIn: 'backend',
+					command: path.normalize(this.formatVariables(command.command, fileName)),
+					runningStatusMessage: this.formatVariables(command.runningStatusMessage, fileName),
+					finishStatusMessage: this.formatVariables(command.finishStatusMessage, fileName)
+				}
+			}
+			else {
+				return <TerminalCommand>{
+					runIn: 'terminal',
+					command: path.normalize(this.formatVariables(command.command, fileName))
+				}
 			}
 		})
 
 		return formattedCommands
 	}
 
-	private filterCommandsForFile(fileName: string): CompiledCommand[] {
+	private filterCommandsForFile(fileName: string): ProcessedCommand[] {
 		return this.commands.filter(({match, notMatch}) => {
 			if (match && !match.test(fileName)) {
 				return false
@@ -74,6 +95,10 @@ export class CommandManager {
 	}
 
 	private formatVariables (commandOrMessage: string, fileName: string): string {
+		if (!commandOrMessage) {
+			return ''
+		}
+
 		commandOrMessage = commandOrMessage.replace(/\${workspaceFolder}/g, vscode.workspace.rootPath || '')
 		commandOrMessage = commandOrMessage.replace(/\${workspaceFolderBasename}/g, path.basename(vscode.workspace.rootPath || ''))
 		commandOrMessage = commandOrMessage.replace(/\${file}/g, fileName)
@@ -93,22 +118,24 @@ export class CommandManager {
 
 
 export class RunOnSaveExtension {
-	private channel: vscode.OutputChannel
 	private context: vscode.ExtensionContext
-	private commandManager: CommandManager
+	private channel: vscode.OutputChannel
 	private config: vscode.WorkspaceConfiguration
+	private commandProcessor: CommandProcessor
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
 		this.channel = vscode.window.createOutputChannel('Run On Save')
-		this.commandManager = new CommandManager()
+		this.commandProcessor = new CommandProcessor()
 		this.loadConfig()
 		this.showEnablingChannelMessage()
+
+		context.subscriptions.push(this.channel)
 	}
 
 	public loadConfig() {
 		this.config = vscode.workspace.getConfiguration('runOnSave')
-		this.commandManager.setCommands(<Command[]>this.config.get('commands') || [])
+		this.commandProcessor.setOriginalCommands(<OriginalCommand[]>this.config.get('commands') || [])
 	}
 	
 	private showEnablingChannelMessage () {
@@ -131,7 +158,8 @@ export class RunOnSaveExtension {
 	}
 
 	private showStatusMessage(message: string) {
-		vscode.window.setStatusBarMessage(message, <number>this.config.get('statusMessageTimeout') || 3000)
+		let disposable = vscode.window.setStatusBarMessage(message, this.config.get('statusMessageTimeout') || 3000)
+		this.context.subscriptions.push(disposable)
 	}
 
 	public onDocumentSave(document: vscode.TextDocument) {
@@ -139,33 +167,64 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		let commandsToRun = this.commandManager.prepareCommandsForFile(document.fileName)
+		let commandsToRun = this.commandProcessor.prepareCommandsForFile(document.fileName)
 		if (commandsToRun.length > 0) {
 			this.runCommands(commandsToRun)
 		}
 	}
 
-	private runCommands(commands: CommandToRun[]) {
-		for (let {command, runningStatusMessage, finishStatusMessage} of commands) {
-			this.showChannelMessage(`Running "${command}"`)
+	private runCommands(commands: (BackendCommand | TerminalCommand) []) {
+		for (let command of commands) {
+			if (command.runIn === 'backend') {
+				this.runBackendCommand(command)
+			}
+			else {
+				this.runTerminalCommand(command)
+			}
+		}
+	}
 
-			if (runningStatusMessage) {
-				this.showStatusMessage(runningStatusMessage)
+	private runBackendCommand (command: BackendCommand) {
+		this.showChannelMessage(`Running "${command.command}"`)
+
+		if (command.runningStatusMessage) {
+			this.showStatusMessage(command.runningStatusMessage)
+		}
+
+		let child = exec(command.command)
+		child.stdout.on('data', data => this.channel.append(data.toString()))
+		child.stderr.on('data', data => this.channel.append(data.toString()))
+		
+		child.on('exit', (e) => {
+			if (e === 0 && (command).finishStatusMessage) {
+				this.showStatusMessage((command).finishStatusMessage)
 			}
 
-			let child = exec(command)
-			child.stdout.on('data', data => this.channel.append(data.toString()))
-			child.stderr.on('data', data => this.channel.append(data.toString()))
-			
-			child.on('exit', (e) => {
-				if (e === 0 && finishStatusMessage) {
-					this.showStatusMessage(finishStatusMessage)
-				}
+			if (e !== 0) {
+				this.channel.show(true)
+			}
+		})
+	}
 
-				if (e !== 0) {
-					this.channel.show(true)
-				}
-			})
+	private runTerminalCommand(command: TerminalCommand) {
+		let terminal = this.createTerminal()
+
+		terminal.show()
+		terminal.sendText(command.command)
+
+		setTimeout(() => {
+			vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup")
+		}, 100)
+	}
+
+	private createTerminal(): vscode.Terminal {
+		let terminalName = 'Run On Save'
+		let terminal = vscode.window.terminals.find(terminal => terminal.name === terminalName)
+
+		if (!terminal) {
+			this.context.subscriptions.push(terminal = vscode.window.createTerminal(terminalName))
 		}
+
+		return terminal
 	}
 }

@@ -21,23 +21,33 @@ Based on [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave).
 
 - "match" - Specify a RegExp source to match file path. e.g., \"\\.scss$\" can used to match scss files.
 - "notMatch" - Specify a RegExp source, the files whole path match it will be excluded. e.g., \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files.
-- "command" - Specify the shell command to execute. You can include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
-- "runningStatusMessage" - Specify the status bar message when the shell command began to execute, also supports variable substitution.
-- "finishStatusMessage" - Specify the status bar message after the shell command finished executing, also supports variable substitution.
+- "commands.command" - Specify the shell command to execute. You can include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
+- "commands.runIn"
+    - backend: Run command silently and output messages to output channel, you can specify runningStatusMessage and finishStatusMessage to give you feekback. Choose this when you don't want to be disturbed.
+    - terminal: Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback.
+- "runningStatusMessage" - Specify the status bar message when the shell command began to run, also supports variable substitution. Only works when runIn=backend.
+- "finishStatusMessage" - Specify the status bar message after the shell command finished executing, also supports variable substitution. Only works when runIn=backend.
 
 
 ### Sample Configuration
 
 ```json
 {
-    "runOnSave.statusMessageTimeout": 3000,
-    "runOnSave.commands": [
+    'runOnSave.statusMessageTimeout': 3000,
+    'runOnSave.commands': [
         {
-            "match": ".*\\.scss$",
-            "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.scss$",
-            "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
-            "runningStatusMessage": "Compiling ${fileBasename}",
-            "finishStatusMessage": "${fileBasename} compiled",
+            'match': '.*\\.scss$',
+            'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
+            'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
+            'runIn': 'backend',
+            'runningStatusMessage': 'Compiling ${fileBasename}',
+            'finishStatusMessage': '${fileBasename} compiled'
+        },
+        {
+            'match': '.*\\.less$',
+            'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.less$',
+            'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
+            'runIn': 'terminal'
         }
     ]
 }
