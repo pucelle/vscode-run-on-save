@@ -42,7 +42,7 @@ export interface TerminalCommand {
 export class CommandProcessor {
 	private commands: ProcessedCommand[]
 	
-	public setOriginalCommands (commands: OriginalCommand[]) {
+	setOriginalCommands (commands: OriginalCommand[]) {
 		this.commands = this.processCommands(commands)
 	}
 
@@ -57,7 +57,7 @@ export class CommandProcessor {
 		})
 	}
 
-	public prepareCommandsForFile (fileName: string): (BackendCommand | TerminalCommand)[] {
+	prepareCommandsForFile (fileName: string): (BackendCommand | TerminalCommand)[] {
 		let filteredCommands = this.filterCommandsForFile(fileName)
 		
 		let formattedCommands = filteredCommands.map((command) => {
@@ -133,7 +133,7 @@ export class RunOnSaveExtension {
 		context.subscriptions.push(this.channel)
 	}
 
-	public loadConfig() {
+	loadConfig() {
 		this.config = vscode.workspace.getConfiguration('runOnSave')
 		this.commandProcessor.setOriginalCommands(<OriginalCommand[]>this.config.get('commands') || [])
 	}
@@ -148,11 +148,11 @@ export class RunOnSaveExtension {
 		this.channel.appendLine(message)
 	}
 
-	public getEnabled(): boolean {
+	getEnabled(): boolean {
 		return !!this.context.globalState.get('enabled', true)
 	}
 		
-	public setEnabled(enabled: boolean) {
+	setEnabled(enabled: boolean) {
 		this.context.globalState.update('enabled', enabled)
 		this.showEnablingChannelMessage()
 	}
@@ -162,7 +162,7 @@ export class RunOnSaveExtension {
 		this.context.subscriptions.push(disposable)
 	}
 
-	public onDocumentSave(document: vscode.TextDocument) {
+	onDocumentSave(document: vscode.TextDocument) {
 		if (!this.getEnabled()) {
 			return
 		}
