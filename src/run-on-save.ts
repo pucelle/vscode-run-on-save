@@ -41,6 +41,10 @@ export interface TerminalCommand {
 
 export class CommandProcessor {
 	private commands: ProcessedCommand[]
+
+	constructor() {
+		this.commands = []
+	}
 	
 	setOriginalCommands (commands: OriginalCommand[]) {
 		this.commands = this.processCommands(commands)
@@ -120,7 +124,7 @@ export class CommandProcessor {
 export class RunOnSaveExtension {
 	private context: vscode.ExtensionContext
 	private channel: vscode.OutputChannel
-	private config: vscode.WorkspaceConfiguration
+	private config!: vscode.WorkspaceConfiguration
 	private commandProcessor: CommandProcessor
 
 	constructor(context: vscode.ExtensionContext) {
