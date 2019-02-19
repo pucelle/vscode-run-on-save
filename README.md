@@ -33,21 +33,21 @@ Based on [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave).
 
 ```json
 {
-    'runOnSave.statusMessageTimeout': 3000,
-    'runOnSave.commands': [
+    "runOnSave.statusMessageTimeout": 3000,
+    "runOnSave.commands": [
         {
-            'match': '.*\\.scss$',
-            'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
-            'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
-            'runIn': 'backend',
-            'runningStatusMessage': 'Compiling ${fileBasename}',
-            'finishStatusMessage': '${fileBasename} compiled'
+            "match": ".*\\.scss$",
+            "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.scss$",
+            "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
+            "runIn": "backend",
+            "runningStatusMessage": "Compiling ${fileBasename}",
+            "finishStatusMessage": "${fileBasename} compiled"
         },
         {
-            'match': '.*\\.less$',
-            'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.less$',
-            'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
-            'runIn': 'terminal'
+            "match": ".*\\.less$",
+            "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.less$",
+            "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
+            "runIn": "terminal"
         }
     ]
 }
