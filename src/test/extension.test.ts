@@ -12,7 +12,7 @@ import {OriginalCommand, CommandProcessor} from '../run-on-save'
 suite("Extension Tests", () => {
 	suite('test backend command', function () {
 		let manager = new CommandProcessor()
-		manager.setOriginalCommands([<OriginalCommand>{
+		manager.setRawCommands([<OriginalCommand>{
 			'match': '.*\\.scss$',
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'backend',
@@ -40,7 +40,7 @@ suite("Extension Tests", () => {
 
 	suite('test terminal command', function () {
 		let manager = new CommandProcessor()
-		manager.setOriginalCommands([<OriginalCommand>{
+		manager.setRawCommands([<OriginalCommand>{
 			'match': '.*\\.scss$',
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'terminal',

@@ -40,13 +40,10 @@ export interface TerminalCommand {
 
 
 export class CommandProcessor {
-	private commands: ProcessedCommand[]
 
-	constructor() {
-		this.commands = []
-	}
+	private commands: ProcessedCommand[] = []
 	
-	setOriginalCommands (commands: OriginalCommand[]) {
+	setRawCommands (commands: OriginalCommand[]) {
 		this.commands = this.processCommands(commands)
 	}
 
@@ -123,14 +120,12 @@ export class CommandProcessor {
 
 export class RunOnSaveExtension {
 	private context: vscode.ExtensionContext
-	private channel: vscode.OutputChannel
 	private config!: vscode.WorkspaceConfiguration
-	private commandProcessor: CommandProcessor
+	private channel = vscode.window.createOutputChannel('Run On Save')
+	private commandProcessor = new CommandProcessor()
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
-		this.channel = vscode.window.createOutputChannel('Run On Save')
-		this.commandProcessor = new CommandProcessor()
 		this.loadConfig()
 		this.showEnablingChannelMessage()
 
@@ -139,7 +134,7 @@ export class RunOnSaveExtension {
 
 	loadConfig() {
 		this.config = vscode.workspace.getConfiguration('runOnSave')
-		this.commandProcessor.setOriginalCommands(<OriginalCommand[]>this.config.get('commands') || [])
+		this.commandProcessor.setRawCommands(<OriginalCommand[]>this.config.get('commands') || [])
 	}
 	
 	private showEnablingChannelMessage () {
