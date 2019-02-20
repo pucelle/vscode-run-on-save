@@ -119,10 +119,11 @@ export class CommandProcessor {
 
 
 export class RunOnSaveExtension {
+
 	private context: vscode.ExtensionContext
 	private config!: vscode.WorkspaceConfiguration
-	private channel = vscode.window.createOutputChannel('Run On Save')
-	private commandProcessor = new CommandProcessor()
+	private channel: vscode.OutputChannel = vscode.window.createOutputChannel('Run On Save')
+	private commandProcessor: CommandProcessor = new CommandProcessor()
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
