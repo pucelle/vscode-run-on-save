@@ -1,5 +1,5 @@
 <h1 align="left">
-    <img src="images/logo.png" width="32" height="32" style="position: relative; top: 4px;" alt="A big save logo" />
+    <img src="https://github.com/pucelle/vscode-run-on-save/raw/master/images/logo.png" width="32" height="32" style="position: relative; top: 4px;" alt="A big save logo" />
     Run on Save - VSCode Extension
 </h1>
 
