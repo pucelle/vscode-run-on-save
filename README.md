@@ -1,4 +1,7 @@
-# Run on Save - VSCode Extension
+<h1 align="left">
+    <img src="images/logo.png" width="32" height="32" style="position: relative; top: 4px;" alt="A big save logo" />
+    Run on Save - VSCode Extension
+</h1>
 
 Configure shell commands and related file patterns, commands will be executed when matched files were saved.
 
