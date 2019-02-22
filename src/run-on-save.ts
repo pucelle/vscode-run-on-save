@@ -122,7 +122,7 @@ export class RunOnSaveExtension {
 
 	private context: vscode.ExtensionContext
 	private config!: vscode.WorkspaceConfiguration
-	private channel: vscode.OutputChannel = vscode.window.createOutputChannel('Run On Save')
+	private channel: vscode.OutputChannel = vscode.window.createOutputChannel('Run on Save')
 	private commandProcessor: CommandProcessor = new CommandProcessor()
 
 	constructor(context: vscode.ExtensionContext) {
@@ -139,7 +139,7 @@ export class RunOnSaveExtension {
 	}
 	
 	private showEnablingChannelMessage () {
-		let message = `Run On Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
+		let message = `Run on Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
 		this.showChannelMessage(message)
 		this.showStatusMessage(message)
 	}
@@ -218,7 +218,7 @@ export class RunOnSaveExtension {
 	}
 
 	private createTerminal(): vscode.Terminal {
-		let terminalName = 'Run On Save'
+		let terminalName = 'Run on Save'
 		let terminal = vscode.window.terminals.find(terminal => terminal.name === terminalName)
 
 		if (!terminal) {

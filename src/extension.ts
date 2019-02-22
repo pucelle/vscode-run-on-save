@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { RunOnSaveExtension } from './run-on-save';
+import {RunOnSaveExtension} from './run-on-save';
 
 
-export function activate(context: vscode.ExtensionContext): void {
+export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
 	let extension = new RunOnSaveExtension(context)
 
 	context.subscriptions.push(
@@ -22,4 +22,6 @@ export function activate(context: vscode.ExtensionContext): void {
 			extension.onDocumentSave(document)
 		})
 	)
+
+	return extension
 }

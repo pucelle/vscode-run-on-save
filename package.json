@@ -59,17 +59,17 @@
 						"properties": {
 							"match": {
 								"type": "string",
-								"description": "Specify a RegExp source to match file path. e.g., \"\\.scss$\" can used to match scss files.",
+								"description": "Specify a RegExp source to match file path.",
 								"default": ""
 							},
 							"notMatch": {
 								"type": "string",
-								"description": "Specify a RegExp source, the files whole path match it will be excluded. e.g., \"[\\\\\\/]_[\\w-]+\\.scss$\" can be used to exclude scss library files.",
+								"description": "Specify a RegExp source, the files whole path match it will be excluded.",
 								"default": ""
 							},
 							"command": {
 								"type": "string",
-								"description": "Specify the shell command string.",
+								"description": "Specify the shell command.",
 								"default": "echo ${file}"
 							},
 							"runIn": {
@@ -82,17 +82,17 @@
 								"default": "backend",
 								"enumDescriptions": [
 									"Run command silently and output messages to output channel, you can specify runningStatusMessage and finishStatusMessage to give you feekback. Choose this when you don't want to be disturbed.",
-									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback."
+									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details."
 								]
 							},
 							"runningStatusMessage": {
 								"type": "string",
-								"description": "Specify the status bar message when the shell command began to run. Only works when runIn=backend.",
+								"description": "Specify the status bar message when the shell command began to run. Only works when `runIn=backend`.",
 								"default": ""
 							},
 							"finishStatusMessage": {
 								"type": "string",
-								"description": "Specify the status bar message after the shell command finished executing. Only works when runIn=backend.",
+								"description": "Specify the status bar message after the shell command finished executing. Only works when `runIn=backend`.",
 								"default": ""
 							}
 						}
