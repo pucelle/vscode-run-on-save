@@ -1,14 +1,8 @@
-// 
-// Note: This example test is leveraging the Mocha test framework.
-// Please refer to their documentation on https://mochajs.org/ for help.
-//
-
-// The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
 import * as path from 'path'
 import {OriginalCommand, CommandProcessor} from '../run-on-save'
 
-// Defines a Mocha test suite to group tests of similar kind together
+
 suite("Extension Tests", () => {
 	suite('test backend command', function () {
 		let manager = new CommandProcessor()
