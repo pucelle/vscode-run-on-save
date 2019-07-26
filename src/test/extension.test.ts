@@ -29,6 +29,14 @@ suite("Extension Tests", () => {
 			let commands = manager.prepareCommandsForFile('folderName/_fileName.scss')
 			assert.deepStrictEqual(commands, [])
 		})
+		
+		test('will escape white spaces', function () {
+			let commands = manager.prepareCommandsForFile('folderName/fileName 1.scss')
+			assert.deepStrictEqual(
+				commands[0].command,
+				path.normalize('node-sass "folderName/fileName 1.scss" "folderName/fileName 1.css"')
+			)
+		})
 	})
 
 

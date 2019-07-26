@@ -65,7 +65,7 @@ export class CommandProcessor {
 			if (command.runIn === 'backend') {
 				return <BackendCommand>{
 					runIn: 'backend',
-					command: path.normalize(this.formatVariables(command.command, fileName)),
+					command: path.normalize(this.formatVariables(command.command, fileName, true)),
 					runningStatusMessage: this.formatVariables(command.runningStatusMessage, fileName),
 					finishStatusMessage: this.formatVariables(command.finishStatusMessage, fileName)
 				}
@@ -73,7 +73,7 @@ export class CommandProcessor {
 			else {
 				return <TerminalCommand>{
 					runIn: 'terminal',
-					command: path.normalize(this.formatVariables(command.command, fileName))
+					command: path.normalize(this.formatVariables(command.command, fileName, true))
 				}
 			}
 		})
@@ -95,25 +95,44 @@ export class CommandProcessor {
 		})
 	}
 
-	private formatVariables (commandOrMessage: string, fileName: string): string {
+	private formatVariables(commandOrMessage: string, fileName: string, isCommand: boolean = false): string {
 		if (!commandOrMessage) {
 			return ''
 		}
 
-		commandOrMessage = commandOrMessage.replace(/\${workspaceFolder}/g, vscode.workspace.rootPath || '')
-		commandOrMessage = commandOrMessage.replace(/\${workspaceFolderBasename}/g, path.basename(vscode.workspace.rootPath || ''))
-		commandOrMessage = commandOrMessage.replace(/\${file}/g, fileName)
-		commandOrMessage = commandOrMessage.replace(/\${fileBasename}/g, path.basename(fileName))
-		commandOrMessage = commandOrMessage.replace(/\${fileBasenameNoExtension}/g, path.basename(fileName, path.extname(fileName)))
-		commandOrMessage = commandOrMessage.replace(/\${fileDirname}/g, path.dirname(fileName))
-		commandOrMessage = commandOrMessage.replace(/\${fileExtname}/g, path.extname(fileName))
-		commandOrMessage = commandOrMessage.replace(/\${cwd}/g, process.cwd())
+		// if white spaces in file name or directory name, we need to wrap them in "".
+		// we doing this by testing each pieces, and wrap them if needed.
+		return commandOrMessage.replace(/\S+/g, (piece: string) => {
+			let oldPiece = piece
+			let quoted = false
+			
+			if (piece[0] === '"' && piece[piece.length - 1] === '"') {
+				piece = piece.slice(1, -1)
+				quoted = true
+			}
 
-		commandOrMessage = commandOrMessage.replace(/\${env\.([\w]+)}/g, (sub: string | undefined, envName: string | undefined) => {
-			return envName ? String(process.env[envName]) : ''
+			piece = piece.replace(/\${workspaceFolder}/g, vscode.workspace.rootPath || '')
+			piece = piece.replace(/\${workspaceFolderBasename}/g, path.basename(vscode.workspace.rootPath || ''))
+			piece = piece.replace(/\${file}/g, fileName)
+			piece = piece.replace(/\${fileBasename}/g, path.basename(fileName))
+			piece = piece.replace(/\${fileBasenameNoExtension}/g, path.basename(fileName, path.extname(fileName)))
+			piece = piece.replace(/\${fileDirname}/g, path.dirname(fileName))
+			piece = piece.replace(/\${fileExtname}/g, path.extname(fileName))
+			piece = piece.replace(/\${cwd}/g, process.cwd())
+
+			piece = piece.replace(/\${env\.([\w]+)}/g, (_sub: string, envName: string) => {
+				return envName ? String(process.env[envName]) : ''
+			})
+
+			if (isCommand && piece !== oldPiece && /[\s"]/.test(piece)) {
+				piece = '"' + piece.replace(/[\\"]/g, '\\$&') + '"'
+			}
+			else if (quoted) {
+				piece = '"' + piece + '"'
+			}
+
+			return piece
 		})
-
-		return commandOrMessage
 	}
 }
 
