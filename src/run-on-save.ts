@@ -1,6 +1,7 @@
 import * as path from 'path'
 import {exec} from 'child_process'
 import * as vscode from 'vscode'
+import {encodeCommandLineToBeQuoted, decodeQuotedCommandLine} from './util'
 
 
 export interface Configuration {
@@ -104,11 +105,9 @@ export class CommandProcessor {
 		// we doing this by testing each pieces, and wrap them if needed.
 		return commandOrMessage.replace(/\S+/g, (piece: string) => {
 			let oldPiece = piece
-			let quoted = false
-			
+
 			if (piece[0] === '"' && piece[piece.length - 1] === '"') {
-				piece = piece.slice(1, -1)
-				quoted = true
+				piece = decodeQuotedCommandLine(piece.slice(1, -1))
 			}
 
 			piece = piece.replace(/\${workspaceFolder}/g, vscode.workspace.rootPath || '')
@@ -124,11 +123,9 @@ export class CommandProcessor {
 				return envName ? String(process.env[envName]) : ''
 			})
 
-			if (isCommand && piece !== oldPiece && /[\s"]/.test(piece)) {
-				piece = '"' + piece.replace(/[\\"]/g, '\\$&') + '"'
-			}
-			else if (quoted) {
-				piece = '"' + piece + '"'
+			// If piece includes spaces or `\\`, then it must be encoded
+			if (isCommand && piece !== oldPiece && /[\s"]|\\\\/.test(piece)) {
+				piece = '"' + encodeCommandLineToBeQuoted(piece) + '"'
 			}
 
 			return piece
