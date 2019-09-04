@@ -19,7 +19,7 @@ suite("Extension Tests", () => {
 			let commands = manager.prepareCommandsForFile('folderName/fileName.scss')
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
-				'command': path.normalize('node-sass folderName/fileName.scss folderName/fileName.css'),
+				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
 			}])
@@ -34,7 +34,28 @@ suite("Extension Tests", () => {
 			let commands = manager.prepareCommandsForFile('folderName/fileName 1.scss')
 			assert.deepStrictEqual(
 				commands[0].command,
-				path.normalize('node-sass "folderName/fileName 1.scss" "folderName/fileName 1.css"')
+				'node-sass "folderName/fileName 1.scss" "folderName/fileName 1.css"'
+			)
+		})
+	})
+
+
+	suite('test backend command with back slash path', function () {
+		let manager = new CommandProcessor()
+		manager.setRawCommands([<OriginalCommand>{
+			'match': '.*\\.scss$',
+			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
+			'runIn': 'backend',
+			'command': 'node-sass ${file} ${fileDirname}\\${fileBasenameNoExtension}.css',
+			'runningStatusMessage': 'Compiling ${fileBasename}',
+			'finishStatusMessage': '${fileBasename} compiled',
+		}])
+
+		test('will escape paths starts with "\\\\"', function () {
+			let commands = manager.prepareCommandsForFile('\\\\folderName\\fileName 1.scss')
+			assert.deepStrictEqual(
+				commands[0].command,
+				'node-sass "\\\\\\\\folderName\\\\fileName 1.scss" "\\\\\\\\folderName\\\\fileName 1.css"'
 			)
 		})
 	})
@@ -53,7 +74,7 @@ suite("Extension Tests", () => {
 			let commands = manager.prepareCommandsForFile('folderName/fileName.scss')
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'terminal',
-				'command': path.normalize('node-sass folderName/fileName.scss folderName/fileName.css')
+				'command': 'node-sass folderName/fileName.scss folderName/fileName.css'
 			}])
 		})
 	})

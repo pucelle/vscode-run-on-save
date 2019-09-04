@@ -59,22 +59,22 @@ export class CommandProcessor {
 		})
 	}
 
-	prepareCommandsForFile (fileName: string): (BackendCommand | TerminalCommand)[] {
-		let filteredCommands = this.filterCommandsForFile(fileName)
+	prepareCommandsForFile (filePath: string): (BackendCommand | TerminalCommand)[] {
+		let filteredCommands = this.filterCommandsForFile(filePath)
 		
 		let formattedCommands = filteredCommands.map((command) => {
 			if (command.runIn === 'backend') {
 				return <BackendCommand>{
 					runIn: 'backend',
-					command: path.normalize(this.formatVariables(command.command, fileName, true)),
-					runningStatusMessage: this.formatVariables(command.runningStatusMessage, fileName),
-					finishStatusMessage: this.formatVariables(command.finishStatusMessage, fileName)
+					command: this.formatVariables(command.command, filePath, true),
+					runningStatusMessage: this.formatVariables(command.runningStatusMessage, filePath),
+					finishStatusMessage: this.formatVariables(command.finishStatusMessage, filePath)
 				}
 			}
 			else {
 				return <TerminalCommand>{
 					runIn: 'terminal',
-					command: path.normalize(this.formatVariables(command.command, fileName, true))
+					command: this.formatVariables(command.command, filePath, true)
 				}
 			}
 		})
@@ -82,13 +82,13 @@ export class CommandProcessor {
 		return formattedCommands
 	}
 
-	private filterCommandsForFile(fileName: string): ProcessedCommand[] {
+	private filterCommandsForFile(filePath: string): ProcessedCommand[] {
 		return this.commands.filter(({match, notMatch}) => {
-			if (match && !match.test(fileName)) {
+			if (match && !match.test(filePath)) {
 				return false
 			}
 
-			if (notMatch && notMatch.test(fileName)) {
+			if (notMatch && notMatch.test(filePath)) {
 				return false
 			}
 
@@ -96,7 +96,7 @@ export class CommandProcessor {
 		})
 	}
 
-	private formatVariables(commandOrMessage: string, fileName: string, isCommand: boolean = false): string {
+	private formatVariables(commandOrMessage: string, filePath: string, isCommand: boolean = false): string {
 		if (!commandOrMessage) {
 			return ''
 		}
@@ -112,11 +112,11 @@ export class CommandProcessor {
 
 			piece = piece.replace(/\${workspaceFolder}/g, vscode.workspace.rootPath || '')
 			piece = piece.replace(/\${workspaceFolderBasename}/g, path.basename(vscode.workspace.rootPath || ''))
-			piece = piece.replace(/\${file}/g, fileName)
-			piece = piece.replace(/\${fileBasename}/g, path.basename(fileName))
-			piece = piece.replace(/\${fileBasenameNoExtension}/g, path.basename(fileName, path.extname(fileName)))
-			piece = piece.replace(/\${fileDirname}/g, path.dirname(fileName))
-			piece = piece.replace(/\${fileExtname}/g, path.extname(fileName))
+			piece = piece.replace(/\${file}/g, filePath)
+			piece = piece.replace(/\${fileBasename}/g, path.basename(filePath))
+			piece = piece.replace(/\${fileBasenameNoExtension}/g, path.basename(filePath, path.extname(filePath)))
+			piece = piece.replace(/\${fileDirname}/g, this.getDirName(filePath))
+			piece = piece.replace(/\${fileExtname}/g, path.extname(filePath))
 			piece = piece.replace(/\${cwd}/g, process.cwd())
 
 			piece = piece.replace(/\${env\.([\w]+)}/g, (_sub: string, envName: string) => {
@@ -130,6 +130,15 @@ export class CommandProcessor {
 
 			return piece
 		})
+	}
+
+	// `path.dirname` can't handle `\\dir\name`
+	private getDirName(filePath: string): string {
+		let dir = filePath.replace(/[\\\/][^\\\/]+$/, '')
+		if (!dir) {
+			dir = filePath[0] || ''
+		}
+		return dir
 	}
 }
 
