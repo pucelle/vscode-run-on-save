@@ -55,7 +55,7 @@ suite("Extension Tests", () => {
 			let commands = manager.prepareCommandsForFile('\\\\folderName\\fileName 1.scss')
 			assert.deepStrictEqual(
 				commands[0].command,
-				'node-sass "\\\\\\\\folderName\\\\fileName 1.scss" "\\\\\\\\folderName\\\\fileName 1.css"'
+				'node-sass "\\\\folderName\\fileName 1.scss" "\\\\folderName\\fileName 1.css"'
 			)
 		})
 	})

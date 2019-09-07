@@ -1,5 +1,5 @@
 export function encodeCommandLineToBeQuoted(command: string) {
-	return command.replace(/[\\"]/g, '\\$&')
+	return command.replace(/["]/g, '\\$&')
 }
 
 
