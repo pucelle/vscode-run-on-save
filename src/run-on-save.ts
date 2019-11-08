@@ -116,6 +116,7 @@ export class CommandProcessor {
 			piece = piece.replace(/\${fileBasename}/g, path.basename(filePath))
 			piece = piece.replace(/\${fileBasenameNoExtension}/g, path.basename(filePath, path.extname(filePath)))
 			piece = piece.replace(/\${fileDirname}/g, this.getDirName(filePath))
+			piece = piece.replace(/\${fileDirDirname}/g, this.getDirName(this.getDirName(filePath)))
 			piece = piece.replace(/\${fileExtname}/g, path.extname(filePath))
 			piece = piece.replace(/\${cwd}/g, process.cwd())
 
