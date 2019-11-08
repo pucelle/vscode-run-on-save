@@ -70,7 +70,6 @@ For more details please refer to [VSCode Tasks](https://code.visualstudio.com/do
  - `${fileBasename}` - the current opened file's basename
  - `${fileBasenameNoExtension}` - the current opened file's basename with no file extension
  - `${fileDirname}` - the current opened file's dirname
- - `${fileDirDirname}` - dirname of current opened file's dirname
  - `${fileExtname}` - the current opened file's extension
  - `${cwd}` - the task runner's current working directory on startup
  - `${env.Name}` - reference environment variables
