@@ -72,15 +72,15 @@ For more details please refer to [VSCode Tasks](https://code.visualstudio.com/do
 
 | Name                         | Description
 | ---                          | ---
-| `${workspaceFolder}`         | the path of the folder opened in VS Code
-| `${workspaceFolderBasename}` | the name of the folder opened in VS Code without any slashes (/)
-| `${file}`                    | the current opened file
-| `${fileBasename}`            | the current opened file's basename
-| `${fileBasenameNoExtension}` | the current opened file's basename with no file extension
-| `${fileDirname}`             | the current opened file's dirname
-| `${fileExtname}`             | the current opened file's extension
-| `${cwd}`                     | the task runner's current working directory on startup
-| `${env.Name}`                | reference environment variables
+| `${workspaceFolder}`         | the path of the folder opened in VS Code.
+| `${workspaceFolderBasename}` | the name of the folder opened in VS Code without any slashes (/).
+| `${file}`                    | the path of current opened file.
+| `${fileBasename}`            | the basename part of current opened file.
+| `${fileBasenameNoExtension}` | the basename part without extension of current opened file.
+| `${fileDirname}`             | the dirname path part of current opened file.
+| `${fileExtname}`             | the extension part of current opened file.
+| `${cwd}`                     | the task runner's current working directory on startup.
+| `${env.Name}`                | reference environment variables.
 
 
 
