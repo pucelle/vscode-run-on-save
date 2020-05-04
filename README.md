@@ -37,6 +37,7 @@ If you prefer running commands in vscode terminal, which keeps message colors an
 | `commands[].runIn`                |
  - `backend`: Run command silently and show messages in output channel, you can specify runningStatusMessage and finishStatusMessage to give you a little feekback. Choose this when you don't want to be disturbed.
  - `terminal`: Run command in vscode terminal, which keeps message colors. Choose this when you want to get feedback details.
+ - `vscode`: Run vscode's command. Choose this if you want to execute vscode's own command or a command of a particular extension.
 
 
 ### Sample Configuration
