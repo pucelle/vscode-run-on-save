@@ -59,6 +59,11 @@ If you prefer running commands in vscode terminal, which keeps message colors an
             "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.less$",
             "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
             "runIn": "terminal"
+        },
+        {
+            "match": ".*\\.py$",
+            "command": "python.runLinting",
+            "runIn": "vscode"
         }
     ]
 }
