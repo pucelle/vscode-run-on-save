@@ -16,6 +16,8 @@ If you prefer running commands in vscode terminal, which keeps message colors an
 
 ![terminal](images/terminal.gif)
 
+If you need to run VS Code's commands change `runIn` option to `vscode`
+
 
 ## Configuration
 
