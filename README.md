@@ -16,6 +16,8 @@ If you prefer running commands in vscode terminal, which keeps message colors an
 
 ![terminal](images/terminal.gif)
 
+If you need to run VS Code's commands change `runIn` option to `vscode`
+
 
 ## Configuration
 
@@ -37,6 +39,7 @@ If you prefer running commands in vscode terminal, which keeps message colors an
 | `commands[].runIn`                |
  - `backend`: Run command silently and show messages in output channel, you can specify runningStatusMessage and finishStatusMessage to give you a little feekback. Choose this when you don't want to be disturbed.
  - `terminal`: Run command in vscode terminal, which keeps message colors. Choose this when you want to get feedback details.
+ - `vscode`: Run vscode's command. Choose this if you want to execute vscode's own command or a command of a particular extension.
 
 
 ### Sample Configuration
@@ -58,6 +61,11 @@ If you prefer running commands in vscode terminal, which keeps message colors an
             "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.less$",
             "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
             "runIn": "terminal"
+        },
+        {
+            "match": ".*\\.py$",
+            "command": "python.runLinting",
+            "runIn": "vscode"
         }
     ]
 }

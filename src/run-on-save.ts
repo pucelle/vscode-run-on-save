@@ -39,11 +39,16 @@ export interface TerminalCommand {
 	command: string
 }
 
+export interface VSCodeCommand {
+	runIn: 'vscode'
+	command: string
+}
+
 
 export class CommandProcessor {
 
 	private commands: ProcessedCommand[] = []
-	
+
 	setRawCommands (commands: OriginalCommand[]) {
 		this.commands = this.processCommands(commands)
 	}
@@ -59,9 +64,9 @@ export class CommandProcessor {
 		})
 	}
 
-	prepareCommandsForFile (filePath: string): (BackendCommand | TerminalCommand)[] {
+	prepareCommandsForFile (filePath: string): (BackendCommand | TerminalCommand | VSCodeCommand)[] {
 		let filteredCommands = this.filterCommandsForFile(filePath)
-		
+
 		let formattedCommands = filteredCommands.map((command) => {
 			if (command.runIn === 'backend') {
 				return <BackendCommand>{
@@ -71,9 +76,15 @@ export class CommandProcessor {
 					finishStatusMessage: this.formatVariables(command.finishStatusMessage, filePath)
 				}
 			}
-			else {
+			else if (command.runIn === 'terminal') {
 				return <TerminalCommand>{
 					runIn: 'terminal',
+					command: this.formatVariables(command.command, filePath, true)
+				}
+			}
+			else {
+				return <VSCodeCommand>{
+					runIn: 'vscode',
 					command: this.formatVariables(command.command, filePath, true)
 				}
 			}
@@ -162,7 +173,7 @@ export class RunOnSaveExtension {
 		this.config = vscode.workspace.getConfiguration('runOnSave')
 		this.commandProcessor.setRawCommands(<OriginalCommand[]>this.config.get('commands') || [])
 	}
-	
+
 	private showEnablingChannelMessage () {
 		let message = `Run on Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
 		this.showChannelMessage(message)
@@ -176,7 +187,7 @@ export class RunOnSaveExtension {
 	getEnabled(): boolean {
 		return !!this.context.globalState.get('enabled', true)
 	}
-		
+
 	setEnabled(enabled: boolean) {
 		this.context.globalState.update('enabled', enabled)
 		this.showEnablingChannelMessage()
@@ -198,18 +209,20 @@ export class RunOnSaveExtension {
 		}
 	}
 
-	private runCommands(commands: (BackendCommand | TerminalCommand) []) {
+	private runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand) []) {
 		for (let command of commands) {
 			if (command.runIn === 'backend') {
 				this.runBackendCommand(command)
 			}
-			else {
+			else if (command.runIn === 'terminal') {
 				this.runTerminalCommand(command)
+			} else {
+				this.runVSCodeCommand(command)
 			}
 		}
 	}
 
-	private runBackendCommand (command: BackendCommand) {
+	private runBackendCommand(command: BackendCommand) {
 		this.showChannelMessage(`Running "${command.command}"`)
 
 		if (command.runningStatusMessage) {
@@ -219,7 +232,7 @@ export class RunOnSaveExtension {
 		let child = exec(command.command)
 		child.stdout.on('data', data => this.channel.append(data.toString()))
 		child.stderr.on('data', data => this.channel.append(data.toString()))
-		
+
 		child.on('exit', (e) => {
 			if (e === 0 && (command).finishStatusMessage) {
 				this.showStatusMessage((command).finishStatusMessage)
@@ -240,6 +253,13 @@ export class RunOnSaveExtension {
 		setTimeout(() => {
 			vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup")
 		}, 100)
+	}
+
+	private runVSCodeCommand(command: VSCodeCommand) {
+		// finishStatusMessage have to be hooked to exit of command execution
+		this.showChannelMessage(`Running "${command.command}"`)
+
+		vscode.commands.executeCommand(command.command);
 	}
 
 	private createTerminal(): vscode.Terminal {
