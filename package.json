@@ -50,6 +50,11 @@
 					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Only works when runIn=backend.",
 					"default": 3000
 				},
+				"runOnSave.shell": {
+					"type": "string",
+					"description": "Specify what shell will be used for all the commands. Default is vscode default shell.",
+					"default": null
+				},
 				"runOnSave.commands": {
 					"type": "array",
 					"description": "Shell commands array.",

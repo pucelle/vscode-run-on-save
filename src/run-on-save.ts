@@ -1,14 +1,15 @@
 import * as path from 'path'
-import {exec} from 'child_process'
+import {exec, ChildProcess} from 'child_process'
 import * as vscode from 'vscode'
 import {encodeCommandLineToBeQuoted, decodeQuotedCommandLine} from './util'
 
 
 export interface Configuration {
 	statusMessageTimeout: number
+	shell: String
 	commands: OriginalCommand
 }
-
+ 
 export interface OriginalCommand {
 	match: string
 	notMatch: string
@@ -222,6 +223,21 @@ export class RunOnSaveExtension {
 		}
 	}
 
+	private getShell(): string | undefined {
+		return this.config.get('shell') || undefined
+	}
+
+	private execCommand(command: string): ChildProcess {
+		let shell = this.getShell()
+		if(shell) {
+			return exec(command, {
+				shell: shell
+			})
+		} else {
+			return exec(command)
+		}
+	}
+
 	private runBackendCommand(command: BackendCommand) {
 		this.showChannelMessage(`Running "${command.command}"`)
 
@@ -229,7 +245,7 @@ export class RunOnSaveExtension {
 			this.showStatusMessage(command.runningStatusMessage)
 		}
 
-		let child = exec(command.command)
+		let child = this.execCommand(command.command)
 		child.stdout.on('data', data => this.channel.append(data.toString()))
 		child.stderr.on('data', data => this.channel.append(data.toString()))
 
@@ -267,7 +283,7 @@ export class RunOnSaveExtension {
 		let terminal = vscode.window.terminals.find(terminal => terminal.name === terminalName)
 
 		if (!terminal) {
-			this.context.subscriptions.push(terminal = vscode.window.createTerminal(terminalName))
+			this.context.subscriptions.push(terminal = vscode.window.createTerminal(terminalName, this.getShell()))
 		}
 
 		return terminal
