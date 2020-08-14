@@ -25,6 +25,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | ---                              | ---
 | `runOnSave.statusMessageTimeout` | Specify the timeout millisecond after which the status bar message will hide, default value is `3000`, means 3 seconds.
 | `runOnSave.commands`             | Specify the array of shell commands to execute and related info, its child options as below.
+| `runOnSave.shell`                | Specify in which shell the commands are executed, defaults to the default vscode shell.
 
 
 ### Command Options
