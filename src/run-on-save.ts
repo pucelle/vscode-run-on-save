@@ -217,7 +217,8 @@ export class RunOnSaveExtension {
 			}
 			else if (command.runIn === 'terminal') {
 				this.runTerminalCommand(command)
-			} else {
+			}
+			else {
 				this.runVSCodeCommand(command)
 			}
 		}
@@ -229,11 +230,12 @@ export class RunOnSaveExtension {
 
 	private execCommand(command: string): ChildProcess {
 		let shell = this.getShell()
-		if(shell) {
+		if (shell) {
 			return exec(command, {
 				shell: shell
 			})
-		} else {
+		}
+		else {
 			return exec(command)
 		}
 	}
