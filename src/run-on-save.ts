@@ -65,7 +65,7 @@ export class CommandProcessor {
 		})
 	}
 
-	prepareCommandsForFile (filePath: string): (BackendCommand | TerminalCommand | VSCodeCommand)[] {
+	prepareCommandsForFile (filePath: string, beforeSave: boolean = false): (BackendCommand | TerminalCommand | VSCodeCommand)[] {
 		let filteredCommands = this.filterCommandsForFile(filePath)
 
 		let formattedCommands = filteredCommands.map((command) => {
@@ -94,7 +94,7 @@ export class CommandProcessor {
 		return formattedCommands
 	}
 
-	private filterCommandsForFile(filePath: string): ProcessedCommand[] {
+	private filterCommandsForFile(filePath: string, beforeSave: boolean = false): ProcessedCommand[] {
 		return this.commands.filter(({match, notMatch}) => {
 			if (match && !match.test(filePath)) {
 				return false
@@ -208,6 +208,14 @@ export class RunOnSaveExtension {
 		if (commandsToRun.length > 0) {
 			this.runCommands(commandsToRun)
 		}
+	}
+
+	onDocumentBeforeSave(document: vscode.TextDocument) {
+		if (!this.getEnabled()) {
+			return
+		}
+
+		// TODO
 	}
 
 	private runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand) []) {
