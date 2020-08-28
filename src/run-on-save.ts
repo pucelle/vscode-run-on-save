@@ -224,20 +224,20 @@ export class RunOnSaveExtension {
 		}
 	}
 
-	private getShell(): string | undefined {
-		return this.config.get('shell') || undefined
-	}
-
 	private execCommand(command: string): ChildProcess {
-		let shell = this.getShell()
+		let shell = this.getShellPath()
 		if (shell) {
 			return exec(command, {
-				shell: shell
+				shell,
 			})
 		}
 		else {
 			return exec(command)
 		}
+	}
+
+	private getShellPath(): string | undefined {
+		return this.config.get('shell') || undefined
 	}
 
 	private runBackendCommand(command: BackendCommand) {
@@ -277,7 +277,7 @@ export class RunOnSaveExtension {
 		// finishStatusMessage have to be hooked to exit of command execution
 		this.showChannelMessage(`Running "${command.command}"`)
 
-		vscode.commands.executeCommand(command.command);
+		vscode.commands.executeCommand(command.command)
 	}
 
 	private createTerminal(): vscode.Terminal {
@@ -285,7 +285,7 @@ export class RunOnSaveExtension {
 		let terminal = vscode.window.terminals.find(terminal => terminal.name === terminalName)
 
 		if (!terminal) {
-			this.context.subscriptions.push(terminal = vscode.window.createTerminal(terminalName, this.getShell()))
+			this.context.subscriptions.push(terminal = vscode.window.createTerminal(terminalName, this.getShellPath()))
 		}
 
 		return terminal
