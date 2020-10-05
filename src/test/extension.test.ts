@@ -1,12 +1,12 @@
-import * as assert from 'assert';
+import * as assert from 'assert'
 import * as path from 'path'
-import {OriginalCommand, CommandProcessor} from '../run-on-save'
+import {RawCommand, CommandProcessor} from '../command-processor'
 
 
 suite("Extension Tests", () => {
 	suite('test backend command', function () {
 		let manager = new CommandProcessor()
-		manager.setRawCommands([<OriginalCommand>{
+		manager.setRawCommands([<RawCommand>{
 			'match': '.*\\.scss$',
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'backend',
@@ -42,7 +42,7 @@ suite("Extension Tests", () => {
 
 	suite('test backend command with back slash path', function () {
 		let manager = new CommandProcessor()
-		manager.setRawCommands([<OriginalCommand>{
+		manager.setRawCommands([<RawCommand>{
 			'match': '.*\\.scss$',
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'backend',
@@ -63,7 +63,7 @@ suite("Extension Tests", () => {
 
 	suite('test terminal command', function () {
 		let manager = new CommandProcessor()
-		manager.setRawCommands([<OriginalCommand>{
+		manager.setRawCommands([<RawCommand>{
 			'match': '.*\\.scss$',
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'terminal',
