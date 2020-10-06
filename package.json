@@ -65,7 +65,7 @@
 						"properties": {
 							"match": {
 								"type": "string",
-								"description": "Specify a RegExp source to match file path.",
+								"description": "Specify a RegExp source to match file path. Note if specifies both `match` and `globMatch`, commands matched them both will be executed.",
 								"default": ""
 							},
 							"notMatch": {
@@ -75,7 +75,7 @@
 							},
 							"globMatch": {
 								"type": "string",
-								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer",
+								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer. Note if specifies both `match` and `globMatch`, commands matched them both will be executed.",
 								"default": ""
 							},
 							"commandBeforeSaving": {
