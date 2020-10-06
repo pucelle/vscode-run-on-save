@@ -1,5 +1,11 @@
 # ChangeLog
 
+## [1.3.0]
+
+ - Support `commandBeforeSaving`.
+ - Support `globMatch` to make it easier to specifies file matcher.
+
+
 ## [1.2.0]
 
  - Support vscode command, Thanks to Hulvdan@github.
