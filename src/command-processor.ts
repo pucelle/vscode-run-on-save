@@ -153,6 +153,7 @@ export class CommandProcessor {
 			piece = piece.replace(/\${fileBasenameNoExtension}/g, path.basename(filePath, path.extname(filePath)))
 			piece = piece.replace(/\${fileDirname}/g, this.getDirName(filePath))
 			piece = piece.replace(/\${fileExtname}/g, path.extname(filePath))
+			piece = piece.replace(/\${fileRelative}/g, path.relative(vscode.workspace.rootPath || '', filePath))
 			piece = piece.replace(/\${cwd}/g, process.cwd())
 
 			piece = piece.replace(/\${env\.([\w]+)}/g, (_sub: string, envName: string) => {
