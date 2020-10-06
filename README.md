@@ -38,7 +38,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `commands[].command`              | Specify the shell command to execute. You may include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
 | `commands[].runningStatusMessage` | Specify the status bar message when the shell command begin to run, supports variable substitution too. Only works when `runIn=backend`.
 | `commands[].finishStatusMessage`  | Specify the status bar message after the shell command finished executing, also supports variable substitution. Only works when `runIn=backend`.
-| `commands[].runIn`                |
+| `commands[].runIn`                | See list below.
  - `backend`: Run command silently and show messages in output channel, you can specify runningStatusMessage and finishStatusMessage to give you a little feekback. Choose this when you don't want to be disturbed.
  - `terminal`: Run command in vscode terminal, which keeps message colors. Choose this when you want to get feedback details.
  - `vscode`: Run vscode's command. Choose this if you want to execute vscode's own command or a command of a particular extension.
