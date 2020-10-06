@@ -54,51 +54,76 @@ export class RunOnSaveExtension {
 		this.context.subscriptions.push(disposable)
 	}
 
-	onDocumentSave(document: vscode.TextDocument) {
+	/** Returns a promise it was resolved firstly and then save document. */
+	async onWillSaveDocument(document: vscode.TextDocument) {
 		if (!this.getEnabled()) {
 			return
 		}
 
-		let commandsToRun = this.commandProcessor.prepareCommandsForFile(document.fileName)
+		let commandsToRun = this.commandProcessor.prepareCommandsForFileBeforeSaving(document.fileName)
 		if (commandsToRun.length > 0) {
-			this.runCommands(commandsToRun)
+			await this.runCommands(commandsToRun)
 		}
 	}
 
-	private runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand) []) {
+	async onDocumentSaved(document: vscode.TextDocument) {
+		if (!this.getEnabled()) {
+			return
+		}
+
+		let commandsToRun = this.commandProcessor.prepareCommandsForFileAfterSaving(document.fileName)
+		if (commandsToRun.length > 0) {
+			await this.runCommands(commandsToRun)
+		}
+	}
+
+	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand) []) {
+		let promises: Promise<void>[] = []
+
+		// Run all the commands in parallel, not in series.
 		for (let command of commands) {
+			let promise: Promise<void>
+
 			if (command.runIn === 'backend') {
-				this.runBackendCommand(command)
+				promise = this.runBackendCommand(command)
 			}
 			else if (command.runIn === 'terminal') {
-				this.runTerminalCommand(command)
+				promise = this.runTerminalCommand(command)
 			}
 			else {
-				this.runVSCodeCommand(command)
+				promise = this.runVSCodeCommand(command)
 			}
+
+			promises.push(promise)
 		}
+
+		await Promise.all(promises)
 	}
 
 	private runBackendCommand(command: BackendCommand) {
-		this.showChannelMessage(`Running "${command.command}"`)
+		return new Promise((resolve) => {
+			this.showChannelMessage(`Running "${command.command}"`)
 
-		if (command.runningStatusMessage) {
-			this.showStatusMessage(command.runningStatusMessage)
-		}
-
-		let child = this.execShellCommand(command.command)
-		child.stdout.on('data', data => this.channel.append(data.toString()))
-		child.stderr.on('data', data => this.channel.append(data.toString()))
-
-		child.on('exit', (e) => {
-			if (e === 0 && (command).finishStatusMessage) {
-				this.showStatusMessage((command).finishStatusMessage)
+			if (command.runningStatusMessage) {
+				this.showStatusMessage(command.runningStatusMessage)
 			}
+	
+			let child = this.execShellCommand(command.command)
+			child.stdout.on('data', data => this.channel.append(data.toString()))
+			child.stderr.on('data', data => this.channel.append(data.toString()))
+	
+			child.on('exit', (e) => {
+				if (e === 0 && command.finishStatusMessage) {
+					this.showStatusMessage(command.finishStatusMessage)
+				}
+	
+				if (e !== 0) {
+					this.channel.show(true)
+				}
 
-			if (e !== 0) {
-				this.channel.show(true)
-			}
-		})
+				resolve()
+			})
+		}) as Promise<void>
 	}
 
 	private execShellCommand(command: string): ChildProcess {
@@ -118,7 +143,7 @@ export class RunOnSaveExtension {
 		return this.config.get('shell') || undefined
 	}
 
-	private runTerminalCommand(command: TerminalCommand) {
+	private async runTerminalCommand(command: TerminalCommand) {
 		let terminal = this.createTerminal()
 
 		terminal.show()
@@ -140,10 +165,10 @@ export class RunOnSaveExtension {
 		return terminal
 	}
 
-	private runVSCodeCommand(command: VSCodeCommand) {
+	private async runVSCodeCommand(command: VSCodeCommand) {
 		// finishStatusMessage have to be hooked to exit of command execution
 		this.showChannelMessage(`Running "${command.command}"`)
 
-		vscode.commands.executeCommand(command.command)
+		await vscode.commands.executeCommand(command.command)
 	}
 }

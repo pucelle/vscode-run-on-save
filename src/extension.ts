@@ -18,9 +18,13 @@ export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
 			extension.setEnabled(false)
 		}),
 
+		vscode.workspace.onWillSaveTextDocument((e: vscode.TextDocumentWillSaveEvent) => {
+			e.waitUntil(extension.onWillSaveDocument(e.document))
+		}),
+
 		vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
-			extension.onDocumentSave(document)
-		})
+			extension.onDocumentSaved(document)
+		}),
 	)
 
 	return extension

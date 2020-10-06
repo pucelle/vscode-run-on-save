@@ -9,7 +9,8 @@ export interface RawCommand {
 	match: string
 	notMatch: string
 	globMatch: string
-	command: string
+	commandBeforeSaving?: string
+	command?: string
 	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
@@ -20,7 +21,8 @@ export interface ProcessedCommand {
 	match?: RegExp
 	notMatch?: RegExp
 	globMatch?: string
-	command: string
+	commandBeforeSaving?: string
+	command?: string
 	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
@@ -53,7 +55,7 @@ export class CommandProcessor {
 	}
 
 	private processCommands(commands: RawCommand[]): ProcessedCommand[] {
-		return commands.filter(command => command.command).map(command => {
+		return commands.map(command => {
 			command.runIn = command.runIn || 'backend'
 
 			return Object.assign({}, command, {
@@ -65,14 +67,32 @@ export class CommandProcessor {
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFile(filePath: string): (BackendCommand | TerminalCommand | VSCodeCommand)[] {
+	prepareCommandsForFileBeforeSaving(filePath: string) {
+		return this.prepareCommandsForFile(filePath, true)
+	}
+
+	/** Prepare raw commands to link current working file. */
+	prepareCommandsForFileAfterSaving(filePath: string) {
+		return this.prepareCommandsForFile(filePath, false)
+	}
+	
+	/** Prepare raw commands to link current working file. */
+	private prepareCommandsForFile(filePath: string, forCommandsAfterSaving: boolean) {
 		let filteredCommands = this.filterCommandsFromFilePath(filePath)
 
 		let processedCommands = filteredCommands.map((command) => {
+			let commandString = forCommandsAfterSaving
+				? command.commandBeforeSaving
+				: command.command
+
+			if (!commandString) {
+				return null
+			}
+
 			if (command.runIn === 'backend') {
 				return {
 					runIn: 'backend',
-					command: this.formatVariables(command.command, filePath, true),
+					command: this.formatVariables(commandString, filePath, true),
 					runningStatusMessage: this.formatVariables(command.runningStatusMessage, filePath),
 					finishStatusMessage: this.formatVariables(command.finishStatusMessage, filePath)
 				} as BackendCommand
@@ -80,18 +100,18 @@ export class CommandProcessor {
 			else if (command.runIn === 'terminal') {
 				return {
 					runIn: 'terminal',
-					command: this.formatVariables(command.command, filePath, true)
+					command: this.formatVariables(commandString, filePath, true)
 				} as TerminalCommand
 			}
 			else {
 				return {
 					runIn: 'vscode',
-					command: this.formatVariables(command.command, filePath, true)
+					command: this.formatVariables(commandString, filePath, true)
 				} as VSCodeCommand
 			}
 		})
 
-		return processedCommands
+		return processedCommands.filter(v => v) as (BackendCommand | TerminalCommand | VSCodeCommand)[]
 	}
 
 	private filterCommandsFromFilePath(filePath: string): ProcessedCommand[] {

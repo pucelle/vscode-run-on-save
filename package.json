@@ -78,9 +78,14 @@
 								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer",
 								"default": ""
 							},
+							"commandBeforeSaving": {
+								"type": "string",
+								"description": "Specify the command to be executed before saving the file. Note that for backend command, file will be saved after command executed completed.",
+								"default": "echo ${file}"
+							},
 							"command": {
 								"type": "string",
-								"description": "Specify the shell command.",
+								"description": "Specify the command to be executed after file saved.",
 								"default": "echo ${file}"
 							},
 							"runIn": {

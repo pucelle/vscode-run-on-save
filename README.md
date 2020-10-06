@@ -46,7 +46,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 
 ### Sample Configuration
 
-```json
+```js
 {
     "runOnSave.statusMessageTimeout": 3000,
     "runOnSave.commands": [
