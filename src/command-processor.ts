@@ -1,12 +1,14 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 import {encodeCommandLineToBeQuoted, decodeQuotedCommandLine} from './util'
+import * as minimatch from 'minimatch'
 
 
-/** Raw command which is not processed. */
+/** Raw command configured by user. */
 export interface RawCommand {
 	match: string
 	notMatch: string
+	globMatch: string
 	command: string
 	runIn: string
 	runningStatusMessage: string
@@ -17,6 +19,7 @@ export interface RawCommand {
 export interface ProcessedCommand {
 	match?: RegExp
 	notMatch?: RegExp
+	globMatch?: string
 	command: string
 	runIn: string
 	runningStatusMessage: string
@@ -55,48 +58,53 @@ export class CommandProcessor {
 
 			return Object.assign({}, command, {
 				match: command.match ? new RegExp(command.match, 'i') : undefined,
-				notMatch: command.notMatch ? new RegExp(command.notMatch, 'i') : undefined
+				notMatch: command.notMatch ? new RegExp(command.notMatch, 'i') : undefined,
+				globMatch: command.globMatch ? command.globMatch : undefined
 			})
 		})
 	}
 
 	/** Prepare raw commands to link current working file. */
 	prepareCommandsForFile(filePath: string): (BackendCommand | TerminalCommand | VSCodeCommand)[] {
-		let filteredCommands = this.filterCommandsForFile(filePath)
+		let filteredCommands = this.filterCommandsFromFilePath(filePath)
 
-		let formattedCommands = filteredCommands.map((command) => {
+		let processedCommands = filteredCommands.map((command) => {
 			if (command.runIn === 'backend') {
-				return <BackendCommand>{
+				return {
 					runIn: 'backend',
 					command: this.formatVariables(command.command, filePath, true),
 					runningStatusMessage: this.formatVariables(command.runningStatusMessage, filePath),
 					finishStatusMessage: this.formatVariables(command.finishStatusMessage, filePath)
-				}
+				} as BackendCommand
 			}
 			else if (command.runIn === 'terminal') {
-				return <TerminalCommand>{
+				return {
 					runIn: 'terminal',
 					command: this.formatVariables(command.command, filePath, true)
-				}
+				} as TerminalCommand
 			}
 			else {
-				return <VSCodeCommand>{
+				return {
 					runIn: 'vscode',
 					command: this.formatVariables(command.command, filePath, true)
-				}
+				} as VSCodeCommand
 			}
 		})
 
-		return formattedCommands
+		return processedCommands
 	}
 
-	private filterCommandsForFile(filePath: string): ProcessedCommand[] {
-		return this.commands.filter(({match, notMatch}) => {
+	private filterCommandsFromFilePath(filePath: string): ProcessedCommand[] {
+		return this.commands.filter(({match, notMatch, globMatch}) => {
 			if (match && !match.test(filePath)) {
 				return false
 			}
 
 			if (notMatch && notMatch.test(filePath)) {
+				return false
+			}
+
+			if (globMatch && !minimatch(filePath, globMatch)) {
 				return false
 			}
 

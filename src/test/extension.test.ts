@@ -1,5 +1,4 @@
 import * as assert from 'assert'
-import * as path from 'path'
 import {RawCommand, CommandProcessor} from '../command-processor'
 
 
@@ -25,7 +24,7 @@ suite("Extension Tests", () => {
 			}])
 		})
 
-		test('will exclude scss file whose file name starts with "_"', function () {
+		test('will exclude scss file that file name starts with "_"', function () {
 			let commands = manager.prepareCommandsForFile('folderName/_fileName.scss')
 			assert.deepStrictEqual(commands, [])
 		})
@@ -36,6 +35,28 @@ suite("Extension Tests", () => {
 				commands[0].command,
 				'node-sass "folderName/fileName 1.scss" "folderName/fileName 1.css"'
 			)
+		})
+	})
+
+
+	suite('test globMatch', function () {
+		let manager = new CommandProcessor()
+		manager.setRawCommands([<RawCommand>{
+			'globMatch': '**/*.scss',
+			'runIn': 'backend',
+			'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
+			'runningStatusMessage': 'Compiling ${fileBasename}',
+			'finishStatusMessage': '${fileBasename} compiled',
+		}])
+
+		test('will compile scss file in backend', function () {
+			let commands = manager.prepareCommandsForFile('folderName/fileName.scss')
+			assert.deepStrictEqual(commands, [{
+				'runIn': 'backend',
+				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
+				'runningStatusMessage': 'Compiling fileName.scss',
+				'finishStatusMessage': 'fileName.scss compiled',
+			}])
 		})
 	})
 

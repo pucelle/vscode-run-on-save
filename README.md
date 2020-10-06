@@ -33,7 +33,8 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | Name                              | Description
 | ---                               | ---
 | `commands[].match`                | Specify a RegExp source to match file path. E.g.: `\\.scss$` can used to match scss files.
-| `commands[].notMatch`             | Specify a RegExp source, the files whole path match it will be excluded. E.g.: `[\\\\\\/]_[\\w-]+\\.scss$` can be used to exclude scss library files.
+| `commands[].notMatch`             | Specify a RegExp source, the file that whole path match it will be excluded. E.g.: `[\\\\\\/]_[\\w-]+\\.scss$` can be used to exclude scss library files.
+| `commands[].globMatch`            | Specify a glob expression, the file that whole path match it will be included. E.g.: `**/*.scss` will match all scss files. Here it didn't provide a `globNotMatch` pattern because glob expression can do so, please reference to https://github.com/isaacs/node-glob#glob-primer.
 | `commands[].command`              | Specify the shell command to execute. You may include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
 | `commands[].runningStatusMessage` | Specify the status bar message when the shell command begin to run, supports variable substitution too. Only works when `runIn=backend`.
 | `commands[].finishStatusMessage`  | Specify the status bar message after the shell command finished executing, also supports variable substitution. Only works when `runIn=backend`.
@@ -50,6 +51,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
     "runOnSave.statusMessageTimeout": 3000,
     "runOnSave.commands": [
         {
+            // Match scss files except names start with `_`.
             "match": ".*\\.scss$",
             "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.scss$",
             "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
@@ -58,8 +60,8 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
             "finishStatusMessage": "${fileBasename} compiled"
         },
         {
-            "match": ".*\\.less$",
-            "notMatch": "[\\\\\\/]_[^\\\\\\/]*\\.less$",
+            // Match less files except names start with `_`.
+            "globMatch": "**/[^_]*.less",
             "command": "node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css",
             "runIn": "terminal"
         },

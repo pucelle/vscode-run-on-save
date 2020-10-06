@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.2.1",
+	"version": "1.3.0",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -24,7 +24,8 @@
 		"run on save",
 		"save and run",
 		"compile scss on save",
-		"compile less on save"
+		"compile less on save",
+		"compile files on save"
 	],
 	"activationEvents": [
 		"*"
@@ -72,6 +73,11 @@
 								"description": "Specify a RegExp source, the files whole path match it will be excluded.",
 								"default": ""
 							},
+							"globMatch": {
+								"type": "string",
+								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer",
+								"default": ""
+							},
 							"command": {
 								"type": "string",
 								"description": "Specify the shell command.",
@@ -116,9 +122,13 @@
 		"test": "npm run compile && node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
+		"@types/minimatch": "^3.0.3",
 		"@types/mocha": "^2.2.48",
 		"@types/node": "^8.10.62",
 		"typescript": "^3.9.5",
 		"vscode": "^1.1.37"
+	},
+	"dependencies": {
+		"minimatch": "^3.0.4"
 	}
 }
