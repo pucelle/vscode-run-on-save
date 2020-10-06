@@ -1,5 +1,10 @@
 # ChangeLog
 
+## [1.3.1]
+
+ - Support `${fileRelative}`.
+
+
 ## [1.3.0]
 
  - Support `commandBeforeSaving`.
