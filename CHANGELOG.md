@@ -1,5 +1,10 @@
 # ChangeLog
 
+## [1.4.0]
+
+ - Support `forcePathSeparator` option.
+
+
 ## [1.3.1]
 
  - Support `${fileRelative}`.

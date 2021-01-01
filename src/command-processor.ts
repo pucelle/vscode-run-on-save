@@ -11,10 +11,13 @@ export interface RawCommand {
 	globMatch: string
 	commandBeforeSaving?: string
 	command?: string
+	forcePathSeparator?: PathSeparator
 	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
 }
+
+type PathSeparator = '/' | '\\'
 
 /** Processed command, which can be run directly. */
 export interface ProcessedCommand {
@@ -23,6 +26,7 @@ export interface ProcessedCommand {
 	globMatch?: string
 	commandBeforeSaving?: string
 	command?: string
+	forcePathSeparator?: PathSeparator
 	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
@@ -31,6 +35,7 @@ export interface ProcessedCommand {
 export interface BackendCommand {
 	runIn: 'backend'
 	command: string
+	forcePathSeparator?: PathSeparator
 	runningStatusMessage: string
 	finishStatusMessage: string
 }
@@ -38,11 +43,13 @@ export interface BackendCommand {
 export interface TerminalCommand {
 	runIn: 'terminal'
 	command: string
+	forcePathSeparator?: PathSeparator
 }
 
 export interface VSCodeCommand {
 	runIn: 'vscode'
 	command: string
+	forcePathSeparator?: PathSeparator
 }
 
 
@@ -85,6 +92,8 @@ export class CommandProcessor {
 				? command.commandBeforeSaving
 				: command.command
 
+			let pathSeparator = command.forcePathSeparator
+
 			if (!commandString) {
 				return null
 			}
@@ -92,21 +101,21 @@ export class CommandProcessor {
 			if (command.runIn === 'backend') {
 				return {
 					runIn: 'backend',
-					command: this.formatVariables(commandString, filePath, true),
-					runningStatusMessage: this.formatVariables(command.runningStatusMessage, filePath),
-					finishStatusMessage: this.formatVariables(command.finishStatusMessage, filePath)
+					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					runningStatusMessage: this.formatVariables(command.runningStatusMessage, pathSeparator, filePath),
+					finishStatusMessage: this.formatVariables(command.finishStatusMessage, pathSeparator, filePath),
 				} as BackendCommand
 			}
 			else if (command.runIn === 'terminal') {
 				return {
 					runIn: 'terminal',
-					command: this.formatVariables(commandString, filePath, true)
+					command: this.formatVariables(commandString, pathSeparator, filePath, true)
 				} as TerminalCommand
 			}
 			else {
 				return {
 					runIn: 'vscode',
-					command: this.formatVariables(commandString, filePath, true)
+					command: this.formatVariables(commandString, pathSeparator, filePath, true)
 				} as VSCodeCommand
 			}
 		})
@@ -132,10 +141,22 @@ export class CommandProcessor {
 		})
 	}
 
-	private formatVariables(commandOrMessage: string, filePath: string, isCommand: boolean = false): string {
+	private formatVariables(commandOrMessage: string, pathSeparator: PathSeparator | undefined, filePath: string, isCommand: boolean = false): string {
 		if (!commandOrMessage) {
 			return ''
 		}
+
+		let variables = [
+			'workspaceFolder',
+			'workspaceFolderBasename', 
+			'file',
+			'fileBasename',
+			'fileBasenameNoExtension', 
+			'fileDirname',
+			'fileExtname',
+			'fileRelative',
+			'cwd',
+		]
 
 		// if white spaces in file name or directory name, we need to wrap them in "".
 		// we doing this by testing each pieces, and wrap them if needed.
@@ -146,16 +167,17 @@ export class CommandProcessor {
 				piece = decodeQuotedCommandLine(piece.slice(1, -1))
 			}
 
-			piece = piece.replace(/\${workspaceFolder}/g, vscode.workspace.rootPath || '')
-			piece = piece.replace(/\${workspaceFolderBasename}/g, path.basename(vscode.workspace.rootPath || ''))
-			piece = piece.replace(/\${file}/g, filePath)
-			piece = piece.replace(/\${fileBasename}/g, path.basename(filePath))
-			piece = piece.replace(/\${fileBasenameNoExtension}/g, path.basename(filePath, path.extname(filePath)))
-			piece = piece.replace(/\${fileDirname}/g, this.getDirName(filePath))
-			piece = piece.replace(/\${fileExtname}/g, path.extname(filePath))
-			piece = piece.replace(/\${fileRelative}/g, path.relative(vscode.workspace.rootPath || '', filePath))
-			piece = piece.replace(/\${cwd}/g, process.cwd())
-
+			piece = piece.replace(/\${(\w+)}/g, (m0: string, name: string) => {
+				if (variables.includes(name)) {
+					let value = this.getPathVariableValue(name, filePath)
+					value = this.formatPathSeparator(value, pathSeparator)
+					return value
+				}
+				else {
+					return m0
+				}
+			})
+			
 			piece = piece.replace(/\${env\.([\w]+)}/g, (_sub: string, envName: string) => {
 				return envName ? String(process.env[envName]) : ''
 			})
@@ -167,6 +189,50 @@ export class CommandProcessor {
 
 			return piece
 		})
+	}
+
+	/** Get each path variable value from it's name. */
+	private getPathVariableValue(name: string, filePath: string) {
+		switch(name) {
+			case 'workspaceFolder':
+				return vscode.workspace.rootPath || ''
+
+			case 'workspaceFolderBasename':
+				return path.basename(vscode.workspace.rootPath || '')
+
+			case 'file':
+				return filePath
+
+			case 'fileBasename':
+				return path.basename(filePath)
+
+			case 'fileBasenameNoExtension':
+				return path.basename(filePath, path.extname(filePath))
+
+			case 'fileDirname':
+				return this.getDirName(filePath)
+
+			case 'fileExtname':
+				return path.extname(filePath)
+
+			case 'fileRelative':
+				return path.relative(vscode.workspace.rootPath || '', filePath)
+
+			case 'cwd':
+				return process.cwd()
+
+			default:
+				return ''
+		}
+	}
+
+	/** Replace path separators. */
+	private formatPathSeparator(path: string, pathSeparator: string | undefined) {
+		if (pathSeparator) {
+			path = path.replace(/[\\|\/]/g, pathSeparator)
+		}
+
+		return path
 	}
 
 	// `path.dirname` can't handle `\\dir\name`
