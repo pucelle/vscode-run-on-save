@@ -135,7 +135,9 @@ export class RunOnSaveExtension {
 			})
 		}
 		else {
-			return exec(command)
+			return exec(command, {
+				cwd: vscode.workspace.rootPath,
+			})
 		}
 	}
 
