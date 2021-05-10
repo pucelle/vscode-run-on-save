@@ -92,6 +92,7 @@ For more details please refer to [VSCode Tasks](https://code.visualstudio.com/do
 | `${fileBasename}`            | the basename part of current opened file.
 | `${fileBasenameNoExtension}` | the basename part without extension of current opened file.
 | `${fileDirname}`             | the dirname path part of current opened file.
+| `${fileDirnameRelative}`     | the relative dirname path part of current opened file.
 | `${fileExtname}`             | the extension part of current opened file.
 | `${fileRelative}`            | the shorter relative path from current vscode working directory.
 | `${cwd}`                     | the task runner's current working directory on startup.
