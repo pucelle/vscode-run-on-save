@@ -80,7 +80,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 
 Can be used in `command`, `runningStatusMessage`, `finishStatusMessage`.
 
-Note that if `forcePathSeparatorToBe` specified, separators in these variables will be replaced.
+Note that if `forcePathSeparator` specified, separators in these variables will be replaced.
 
 For more details please refer to [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
 
