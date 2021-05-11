@@ -153,6 +153,7 @@ export class CommandProcessor {
 			'fileBasename',
 			'fileBasenameNoExtension', 
 			'fileDirname',
+			'fileDirnameRelative',
 			'fileExtname',
 			'fileRelative',
 			'cwd',
@@ -211,6 +212,9 @@ export class CommandProcessor {
 
 			case 'fileDirname':
 				return this.getDirName(filePath)
+
+			case 'fileDirnameRelative':
+				return this.getDirName(path.relative(vscode.workspace.rootPath || '', filePath))
 
 			case 'fileExtname':
 				return path.extname(filePath)
