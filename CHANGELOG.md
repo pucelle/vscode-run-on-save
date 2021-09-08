@@ -1,5 +1,11 @@
 # ChangeLog
 
+
+## [1.4.3]
+
+ - `globMatch` will also apply "Variable Substitution", so you may specify a `globMatch` expression that include `${workspaceFolder}` to only match saved files in current workspace.
+
+
 ## [1.4.0]
 
  - Support `forcePathSeparator` option.

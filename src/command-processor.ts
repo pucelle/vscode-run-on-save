@@ -133,8 +133,14 @@ export class CommandProcessor {
 				return false
 			}
 
-			if (globMatch && !minimatch(filePath, globMatch)) {
-				return false
+			if (globMatch) {
+				if (/\$\{\w+\}/.test(globMatch)) {
+					globMatch = this.formatVariables(globMatch, undefined, filePath)
+				}
+
+				if (!minimatch(filePath, globMatch)) {
+					return false
+				}
 			}
 
 			return true
@@ -183,7 +189,7 @@ export class CommandProcessor {
 				return envName ? String(process.env[envName]) : ''
 			})
 
-			// If piece includes spaces or `\\`, then it must be encoded
+			// If piece includes spaces or `\\`, then it must be encoded.
 			if (isCommand && piece !== oldPiece && /[\s"]|\\\\/.test(piece)) {
 				piece = '"' + encodeCommandLineToBeQuoted(piece) + '"'
 			}

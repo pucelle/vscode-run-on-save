@@ -78,7 +78,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 
 ### Variable Substitution
 
-Can be used in `command`, `runningStatusMessage`, `finishStatusMessage`.
+Can be used in `command`, `runningStatusMessage`, `finishStatusMessage`, `globMatch`.
 
 Note that if `forcePathSeparator` specified, separators in these variables will be replaced.
 
