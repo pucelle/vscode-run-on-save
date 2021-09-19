@@ -131,13 +131,10 @@ export class RunOnSaveExtension {
 		if (shell) {
 			return exec(command, {
 				shell,
-				cwd: vscode.workspace.rootPath,
 			})
 		}
 		else {
-			return exec(command, {
-				cwd: vscode.workspace.rootPath,
-			})
+			return exec(command)
 		}
 	}
 

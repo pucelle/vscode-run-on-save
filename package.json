@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.4.3",
+	"version": "1.4.4",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -48,7 +48,7 @@
 			"properties": {
 				"runOnSave.statusMessageTimeout": {
 					"type": "number",
-					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Only works when runIn=backend.",
+					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Only works when `runIn=backend`.",
 					"default": 3000
 				},
 				"runOnSave.shell": {
@@ -75,7 +75,7 @@
 							},
 							"globMatch": {
 								"type": "string",
-								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer. Note if specifies both `match` and `globMatch`, commands matched them both will be executed.",
+								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer. Note if specifies both `match` and `globMatch`, only commands matched them both will be executed.",
 								"default": ""
 							},
 							"commandBeforeSaving": {
@@ -98,9 +98,9 @@
 								],
 								"default": "backend",
 								"enumDescriptions": [
-									"Run command silently and output messages to output channel, you can specify runningStatusMessage and finishStatusMessage to give you feekback. Choose this when you don't want to be disturbed.",
+									"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feekback. Choose this when you don't want to be disturbed.",
 									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details.",
-									"Run vscode's command. Choose this if you want to execute vscode's own command or a command of a particular extension."
+									"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
 								]
 							},
 							"runningStatusMessage": {
