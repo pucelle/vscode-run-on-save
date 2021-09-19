@@ -108,7 +108,7 @@ export class RunOnSaveExtension {
 				this.showStatusMessage(command.runningStatusMessage)
 			}
 	
-			let child = this.execShellCommand(command.command)
+			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD)
 			child.stdout.on('data', data => this.channel.append(data.toString()))
 			child.stderr.on('data', data => this.channel.append(data.toString()))
 	
@@ -126,15 +126,20 @@ export class RunOnSaveExtension {
 		}) as Promise<void>
 	}
 
-	private execShellCommand(command: string): ChildProcess {
+	private execShellCommand(command: string, workingDirectoryAsCWD: boolean): ChildProcess {
+		let cwd = workingDirectoryAsCWD ? vscode.workspace.rootPath : undefined
+
 		let shell = this.getShellPath()
 		if (shell) {
 			return exec(command, {
 				shell,
+				cwd,
 			})
 		}
 		else {
-			return exec(command)
+			return exec(command, {
+				cwd,
+			})
 		}
 	}
 

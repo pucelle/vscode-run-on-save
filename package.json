@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.4.4",
+	"version": "1.4.6",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -112,6 +112,11 @@
 								"type": "string",
 								"description": "Specify the status bar message after the shell command finished executing. Only works when `runIn=backend`.",
 								"default": ""
+							},
+							"workingDirectoryAsCWD": {
+								"type": "boolean",
+								"description": "Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.",
+								"default": false
 							}
 						}
 					}

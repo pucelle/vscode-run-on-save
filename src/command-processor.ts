@@ -38,6 +38,7 @@ export interface BackendCommand {
 	forcePathSeparator?: PathSeparator
 	runningStatusMessage: string
 	finishStatusMessage: string
+	workingDirectoryAsCWD: boolean
 }
 
 export interface TerminalCommand {
