@@ -108,7 +108,7 @@ export class RunOnSaveExtension {
 				this.showStatusMessage(command.runningStatusMessage)
 			}
 	
-			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD)
+			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
 			child.stdout.on('data', data => this.channel.append(data.toString()))
 			child.stderr.on('data', data => this.channel.append(data.toString()))
 	
