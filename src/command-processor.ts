@@ -170,9 +170,11 @@ export class CommandProcessor {
 		// we doing this by testing each pieces, and wrap them if needed.
 		return commandOrMessage.replace(/\S+/g, (piece: string) => {
 			let oldPiece = piece
+			let alreadyQuoted = false
 
 			if (piece[0] === '"' && piece[piece.length - 1] === '"') {
 				piece = decodeQuotedCommandLine(piece.slice(1, -1))
+				alreadyQuoted = true
 			}
 
 			piece = piece.replace(/\${(\w+)}/g, (m0: string, name: string) => {
@@ -190,8 +192,8 @@ export class CommandProcessor {
 				return envName ? String(process.env[envName]) : ''
 			})
 
-			// If piece includes spaces or `\\`, then it must be encoded.
-			if (isCommand && piece !== oldPiece && /[\s"]|\\\\/.test(piece)) {
+			// If piece includes spaces or `\\`, or be quoted before, then it must be encoded.
+			if (isCommand && piece !== oldPiece && /[\s"]|\\\\/.test(piece) || alreadyQuoted) {
 				piece = '"' + encodeCommandLineToBeQuoted(piece) + '"'
 			}
 

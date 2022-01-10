@@ -121,4 +121,24 @@ suite("Extension Tests", () => {
 			}])
 		})
 	})
-});
+
+
+	suite('test for #20', function () {
+		let manager = new CommandProcessor()
+		manager.setRawCommands([<RawCommand>{
+			"match": ".*\\.drawio$",
+			"runIn": "backend",
+			"command": "draw.io --crop --export -f pdf \"${file}\""
+		}])
+
+		test('will compile it right', function () {
+			let commands = manager.prepareCommandsForFileAfterSaving('test.drawio')
+			assert.deepStrictEqual(commands, [{
+				'runIn': 'backend',
+				'command': 'draw.io --crop --export -f pdf "test.drawio"',
+				'finishStatusMessage': '',
+				'runningStatusMessage': ''
+			}])
+		})
+	})
+})
