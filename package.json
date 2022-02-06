@@ -105,7 +105,7 @@
 							},
 							"async":{
 								"type": "boolean",
-								"description": "All the commands with `async: false` will run in a sequence and, means run next after previous completed. Default value is `true`.",
+								"description": "All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`.",
 								"default": true
 							},
 							"runningStatusMessage": {
