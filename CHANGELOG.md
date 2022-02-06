@@ -1,6 +1,11 @@
 # ChangeLog
 
 
+## [1.5.0]
+
+ - Adds a `async` option, to support run commands in a sequence.
+
+
 ## [1.4.3]
 
  - `globMatch` will also apply "Variable Substitution", so you may specify a `globMatch` expression that include `${workspaceFolder}` to only match saved files in current workspace.
