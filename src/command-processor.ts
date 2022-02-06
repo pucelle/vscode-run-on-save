@@ -15,6 +15,7 @@ export interface RawCommand {
 	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
+	async?: boolean
 }
 
 type PathSeparator = '/' | '\\'
@@ -30,27 +31,29 @@ export interface ProcessedCommand {
 	runIn: string
 	runningStatusMessage: string
 	finishStatusMessage: string
+	async?: boolean
 }
 
+/** The commands pick by current file path. */
 export interface BackendCommand {
 	runIn: 'backend'
 	command: string
-	forcePathSeparator?: PathSeparator
 	runningStatusMessage: string
 	finishStatusMessage: string
 	workingDirectoryAsCWD: boolean
+	async: boolean
 }
 
 export interface TerminalCommand {
 	runIn: 'terminal'
 	command: string
-	forcePathSeparator?: PathSeparator
+	async: boolean
 }
 
 export interface VSCodeCommand {
 	runIn: 'vscode'
 	command: string
-	forcePathSeparator?: PathSeparator
+	async: boolean
 }
 
 
@@ -105,18 +108,21 @@ export class CommandProcessor {
 					command: this.formatVariables(commandString, pathSeparator, filePath, true),
 					runningStatusMessage: this.formatVariables(command.runningStatusMessage, pathSeparator, filePath),
 					finishStatusMessage: this.formatVariables(command.finishStatusMessage, pathSeparator, filePath),
+					async: command.async ?? true,
 				} as BackendCommand
 			}
 			else if (command.runIn === 'terminal') {
 				return {
 					runIn: 'terminal',
-					command: this.formatVariables(commandString, pathSeparator, filePath, true)
+					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					async: command.async ?? true,
 				} as TerminalCommand
 			}
 			else {
 				return {
 					runIn: 'vscode',
-					command: this.formatVariables(commandString, pathSeparator, filePath, true)
+					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					async: command.async ?? true,
 				} as VSCodeCommand
 			}
 		})

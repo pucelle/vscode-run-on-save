@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.4.8",
+	"version": "1.5.0",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -102,6 +102,11 @@
 									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details.",
 									"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
 								]
+							},
+							"async":{
+								"type": "boolean",
+								"description": "All the commands with `async: false` will run in a sequence and, means run next after previous completed. Default value is `true`.",
+								"default": true
 							},
 							"runningStatusMessage": {
 								"type": "string",

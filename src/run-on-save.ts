@@ -77,27 +77,35 @@ export class RunOnSaveExtension {
 		}
 	}
 
-	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand) []) {
+	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand)[]) {
 		let promises: Promise<void>[] = []
+		let syncCommands = commands.filter(c => !c.async)
+		let asyncCommands = commands.filter(c => c.async)
 
-		// Run all the commands in parallel, not in series.
-		for (let command of commands) {
-			let promise: Promise<void>
-
-			if (command.runIn === 'backend') {
-				promise = this.runBackendCommand(command)
-			}
-			else if (command.runIn === 'terminal') {
-				promise = this.runTerminalCommand(command)
-			}
-			else {
-				promise = this.runVSCodeCommand(command)
-			}
-
+		// Run commands in parallel.
+		for (let command of asyncCommands) {
+			let promise = this.runACommand(command)
 			promises.push(promise)
 		}
 
+		// Run commands in series.
+		for (let command of syncCommands) {
+			await this.runACommand(command)
+		}
+
 		await Promise.all(promises)
+	}
+
+	private runACommand(command: BackendCommand | TerminalCommand | VSCodeCommand): Promise<void> {
+		if (command.runIn === 'backend') {
+			return this.runBackendCommand(command)
+		}
+		else if (command.runIn === 'terminal') {
+			return this.runTerminalCommand(command)
+		}
+		else {
+			return this.runVSCodeCommand(command)
+		}
 	}
 
 	private runBackendCommand(command: BackendCommand) {
