@@ -48,12 +48,12 @@
 			"properties": {
 				"runOnSave.statusMessageTimeout": {
 					"type": "number",
-					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Only works when `runIn=backend`.",
+					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Works when `runIn=backend`, can be overwriten by the `statusMessageTimeout` in each command.",
 					"default": 3000
 				},
 				"runOnSave.shell": {
 					"type": "string",
-					"description": "Specify what shell will be used for all the commands. Default is vscode default shell.",
+					"description": "Specify what shell will be used for all the commands. Default is vscode's default shell.",
 					"default": null
 				},
 				"runOnSave.commands": {
@@ -117,6 +117,11 @@
 								"type": "string",
 								"description": "Specify the status bar message after the shell command finished executing. Only works when `runIn=backend`.",
 								"default": ""
+							},
+							"statusMessageTimeout": {
+								"type": "number",
+								"description": "Sepcify the timeout in millisecond after which the status message will hide. Only works when `runIn=backend`.",
+								"default": 3000
 							},
 							"workingDirectoryAsCWD": {
 								"type": "boolean",

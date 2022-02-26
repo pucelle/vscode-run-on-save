@@ -1,6 +1,7 @@
 import {exec, ChildProcess} from 'child_process'
 import * as vscode from 'vscode'
 import {RawCommand, CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand} from './command-processor'
+import {timeout} from './util'
 
 
 export interface Configuration {
@@ -49,8 +50,9 @@ export class RunOnSaveExtension {
 		this.showEnablingChannelMessage()
 	}
 
-	private showStatusMessage(message: string) {
-		let disposable = vscode.window.setStatusBarMessage(message, this.config.get('statusMessageTimeout') || 3000)
+	private showStatusMessage(message: string, timeout?: number) {
+		timeout = timeout || this.config.get('statusMessageTimeout') || 3000
+		let disposable = vscode.window.setStatusBarMessage(message, timeout)
 		this.context.subscriptions.push(disposable)
 	}
 
@@ -82,7 +84,7 @@ export class RunOnSaveExtension {
 		let syncCommands = commands.filter(c => !c.async)
 		let asyncCommands = commands.filter(c => c.async)
 
-		// Run commands in parallel.
+		// Run commands in a parallel.
 		for (let command of asyncCommands) {
 			let promise = this.runACommand(command)
 			promises.push(promise)
@@ -113,7 +115,7 @@ export class RunOnSaveExtension {
 			this.showChannelMessage(`Running "${command.command}"`)
 
 			if (command.runningStatusMessage) {
-				this.showStatusMessage(command.runningStatusMessage)
+				this.showStatusMessage(command.runningStatusMessage, command.statusMessageTimeout)
 			}
 	
 			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
@@ -122,7 +124,7 @@ export class RunOnSaveExtension {
 	
 			child.on('exit', (e) => {
 				if (e === 0 && command.finishStatusMessage) {
-					this.showStatusMessage(command.finishStatusMessage)
+					this.showStatusMessage(command.finishStatusMessage, command.statusMessageTimeout)
 				}
 	
 				if (e !== 0) {
@@ -161,9 +163,8 @@ export class RunOnSaveExtension {
 		terminal.show()
 		terminal.sendText(command.command)
 
-		setTimeout(() => {
-			vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup")
-		}, 100)
+		await timeout(100)
+		await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup")
 	}
 
 	private createTerminal(): vscode.Terminal {

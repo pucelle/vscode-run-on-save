@@ -42,12 +42,14 @@ export interface BackendCommand {
 	finishStatusMessage: string
 	workingDirectoryAsCWD: boolean
 	async: boolean
+	statusMessageTimeout?: number
 }
 
 export interface TerminalCommand {
 	runIn: 'terminal'
 	command: string
 	async: boolean
+	statusMessageTimeout?: number
 }
 
 export interface VSCodeCommand {
