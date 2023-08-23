@@ -165,6 +165,11 @@ export class RunOnSaveExtension {
 
 		await timeout(100)
 		await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup")
+
+		if ((command.terminalHideTimeout || -1) >= 0) {
+			await timeout(command.terminalHideTimeout!)
+			terminal.dispose()
+		}
 	}
 
 	private createTerminal(): vscode.Terminal {

@@ -123,6 +123,11 @@
 								"description": "Sepcify the timeout in millisecond after which the status message will hide. Only works when `runIn=backend`.",
 								"default": 3000
 							},
+							"terminalHideTimeout": {
+								"type": "number",
+								"description": "Sepcify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
+								"default": -1
+							},
 							"workingDirectoryAsCWD": {
 								"type": "boolean",
 								"description": "Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.",

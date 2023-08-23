@@ -21,6 +21,7 @@ suite("Extension Tests", () => {
 				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
+				'async': true,
 			}])
 		})
 
@@ -47,6 +48,7 @@ suite("Extension Tests", () => {
 			'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
 			'runningStatusMessage': 'Compiling ${fileBasename}',
 			'finishStatusMessage': '${fileBasename} compiled',
+			'async': true,
 		}])
 
 		test('will compile scss file in backend', function () {
@@ -56,6 +58,7 @@ suite("Extension Tests", () => {
 				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
+				'async': true,
 			}])
 		})
 	})
@@ -69,6 +72,7 @@ suite("Extension Tests", () => {
 			'commandBeforeSaving': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
 			'runningStatusMessage': 'Compiling ${fileBasename}',
 			'finishStatusMessage': '${fileBasename} compiled',
+			'async': true,
 		}])
 
 		test('will compile scss file in backend', function () {
@@ -78,6 +82,7 @@ suite("Extension Tests", () => {
 				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
+				'async': true,
 			}])
 		})
 	})
@@ -117,7 +122,8 @@ suite("Extension Tests", () => {
 			let commands = manager.prepareCommandsForFileAfterSaving('folderName/fileName.scss')
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'terminal',
-				'command': 'node-sass folderName/fileName.scss folderName/fileName.css'
+				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
+				'async': true,
 			}])
 		})
 	})
@@ -137,7 +143,8 @@ suite("Extension Tests", () => {
 				'runIn': 'backend',
 				'command': 'draw.io --crop --export -f pdf "test.drawio"',
 				'finishStatusMessage': '',
-				'runningStatusMessage': ''
+				'runningStatusMessage': '',
+				'async': true,
 			}])
 		})
 	})

@@ -34,7 +34,7 @@ export interface ProcessedCommand {
 	async?: boolean
 }
 
-/** The commands pick by current file path. */
+/** The commands in list will be picked by current editting file path. */
 export interface BackendCommand {
 	runIn: 'backend'
 	command: string
@@ -50,6 +50,7 @@ export interface TerminalCommand {
 	command: string
 	async: boolean
 	statusMessageTimeout?: number
+	terminalHideTimeout?: number
 }
 
 export interface VSCodeCommand {

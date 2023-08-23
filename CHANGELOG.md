@@ -1,6 +1,11 @@
 # ChangeLog
 
 
+## [1.6.0]
+
+ - Adds a `terminalHideTimeout` option, to support close terminal automatically after command ran.
+
+
 ## [1.5.0]
 
  - Adds a `async` option, to support run commands in a sequence.
