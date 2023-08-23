@@ -149,6 +149,6 @@
 		"vscode": "^1.1.37"
 	},
 	"dependencies": {
-		"minimatch": "^3.0.4"
+		"minimatch": "^3.0.5"
 	}
 }
