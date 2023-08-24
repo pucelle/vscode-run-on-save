@@ -1,5 +1,7 @@
 import * as assert from 'assert'
-import {RawCommand, CommandProcessor} from '../command-processor'
+import {RawCommand, CommandProcessor} from '../../out/command-processor'
+import {FileIgnoreChecker} from '../../out/file-ignore-checker'
+import * as path from 'path'
 
 
 suite("Extension Tests", () => {
@@ -146,6 +148,26 @@ suite("Extension Tests", () => {
 				'runningStatusMessage': '',
 				'async': true,
 			}])
+		})
+	})
+
+
+	suite('test for #24, should ignore files follow ".gitignore"', function () {
+		let checker = new FileIgnoreChecker({
+			workspaceDir: path.resolve(__dirname, '../../'),
+			ignoreFilesBy: ['.gitignore'],
+		})
+
+		test('will ignore file 1', async () => {
+			assert.ok(await checker.shouldIgnore(path.resolve(__dirname, '../fixture/should-ignore/test.css')))
+		})
+
+		test('will ignore file 2', async () => {
+			assert.ok(await checker.shouldIgnore(path.resolve(__dirname, '../fixture/should-ignore.css')))
+		})
+
+		test('will not ignore file 3', async () => {
+			assert.ok(!await checker.shouldIgnore(path.resolve(__dirname, 'index.ts')))
 		})
 	})
 })

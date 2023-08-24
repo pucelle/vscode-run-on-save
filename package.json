@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.5.1",
+	"version": "1.6.0",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -50,6 +50,18 @@
 					"type": "number",
 					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Works when `runIn=backend`, can be overwriten by the `statusMessageTimeout` in each command.",
 					"default": 3000
+				},
+				"runOnSave.ignoreFilesBy": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"enum": [
+							".gitignore",
+							".npmignore"
+						]
+					},
+					"default": [],
+					"description": "Specifies it to ignore files list in `.gitignore` or `.npmignore`."
 				},
 				"runOnSave.shell": {
 					"type": "string",
@@ -103,7 +115,7 @@
 									"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
 								]
 							},
-							"async":{
+							"async": {
 								"type": "boolean",
 								"description": "All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`.",
 								"default": true
@@ -144,16 +156,18 @@
 		"build": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "npm run build && node ./node_modules/vscode/bin/test"
+		"test": "cd test && tsc -b && node ../node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
-		"@types/minimatch": "^3.0.4",
+		"@types/fs-extra": "^11.0.1",
+		"@types/minimatch": "^3.0.5",
 		"@types/mocha": "^2.2.48",
-		"@types/node": "^8.10.62",
+		"@types/node": "^20.5.4",
 		"typescript": "^3.9.5",
 		"vscode": "^1.1.37"
 	},
 	"dependencies": {
-		"minimatch": "^3.0.5"
+		"fs-extra": "^11.1.1",
+		"minimatch": "^3.1.2"
 	}
 }

@@ -2,10 +2,12 @@ import {exec, ChildProcess} from 'child_process'
 import * as vscode from 'vscode'
 import {RawCommand, CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand} from './command-processor'
 import {timeout} from './util'
+import {FileIgnoreChecker} from './file-ignore-checker'
 
 
 export interface Configuration {
 	statusMessageTimeout: number
+	ignoreFilesBy: string[]
 	shell: String
 	commands: RawCommand
 }
@@ -62,6 +64,10 @@ export class RunOnSaveExtension {
 			return
 		}
 
+		if (await this.shouldIgnore(document.fileName, document.uri)) {
+			return
+		}
+
 		let commandsToRun = this.commandProcessor.prepareCommandsForFileBeforeSaving(document.fileName)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
@@ -73,10 +79,23 @@ export class RunOnSaveExtension {
 			return
 		}
 
+		if (await this.shouldIgnore(document.fileName, document.uri)) {
+			return
+		}
+
 		let commandsToRun = this.commandProcessor.prepareCommandsForFileAfterSaving(document.fileName)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
+	}
+
+	private async shouldIgnore(filePath: string, uri: vscode.Uri): Promise<boolean> {
+		let checker = new FileIgnoreChecker({
+			workspaceDir: vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath,
+			ignoreFilesBy: this.config.get('ignoreFilesBy') || [],
+		})
+
+		return checker.shouldIgnore(filePath)
 	}
 
 	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand)[]) {
@@ -119,8 +138,8 @@ export class RunOnSaveExtension {
 			}
 	
 			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
-			child.stdout.on('data', data => this.channel.append(data.toString()))
-			child.stderr.on('data', data => this.channel.append(data.toString()))
+			child.stdout!.on('data', data => this.channel.append(data.toString()))
+			child.stderr!.on('data', data => this.channel.append(data.toString()))
 	
 			child.on('exit', (e) => {
 				if (e === 0 && command.finishStatusMessage) {
