@@ -22,6 +22,10 @@ export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
 			e.waitUntil(extension.onWillSaveDocument(e.document))
 		}),
 
+		vscode.workspace.onWillSaveNotebookDocument((e: vscode.NotebookDocumentWillSaveEvent) => {
+			e.waitUntil(extension.onWillSaveDocument(e.notebook))
+		}),
+
 		vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
 			extension.onDocumentSaved(document)
 		}),

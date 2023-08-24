@@ -59,16 +59,16 @@ export class RunOnSaveExtension {
 	}
 
 	/** Returns a promise it was resolved firstly and then save document. */
-	async onWillSaveDocument(document: vscode.TextDocument) {
+	async onWillSaveDocument(document: vscode.TextDocument | vscode.NotebookDocument) {
 		if (!this.getEnabled()) {
 			return
 		}
 
-		if (await this.shouldIgnore(document.fileName, document.uri)) {
+		if (await this.shouldIgnore(document.uri)) {
 			return
 		}
 
-		let commandsToRun = this.commandProcessor.prepareCommandsForFileBeforeSaving(document.fileName)
+		let commandsToRun = this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri.fsPath)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
@@ -79,23 +79,23 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		if (await this.shouldIgnore(document.fileName, document.uri)) {
+		if (await this.shouldIgnore(document.uri)) {
 			return
 		}
 
-		let commandsToRun = this.commandProcessor.prepareCommandsForFileAfterSaving(document.fileName)
+		let commandsToRun = this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri.fsPath)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
 	}
 
-	private async shouldIgnore(filePath: string, uri: vscode.Uri): Promise<boolean> {
+	private async shouldIgnore(uri: vscode.Uri): Promise<boolean> {
 		let checker = new FileIgnoreChecker({
 			workspaceDir: vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath,
 			ignoreFilesBy: this.config.get('ignoreFilesBy') || [],
 		})
 
-		return checker.shouldIgnore(filePath)
+		return checker.shouldIgnore(uri.fsPath)
 	}
 
 	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand)[]) {
@@ -203,7 +203,7 @@ export class RunOnSaveExtension {
 	}
 
 	private async runVSCodeCommand(command: VSCodeCommand) {
-		
+
 		// finishStatusMessage have to be hooked to exit of command execution
 		this.showChannelMessage(`Running "${command.command}"`)
 
