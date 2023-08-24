@@ -37,6 +37,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `commands[].notMatch`             | Specify a RegExp source, the file that whole path match it will be excluded. E.g.: `[\\\\\\/]_[\\w-]+\\.scss$` can be used to exclude scss library files.
 | `commands[].globMatch`            | Specify a glob expression, the file that whole path match it will be included. E.g.: `**/*.scss` will match all scss files. Here it didn't provide a `globNotMatch` pattern because glob expression can do so, please reference to https://github.com/isaacs/node-glob#glob-primer.
 | `commands[].command`              | Specify the shell command to execute. You may include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
+| `commands[].args`                 | Specify the command parameters, can be a string, array of string, or an object.
 | `commands[].forcePathSeparator`   | Force path separator in variable substitution to be `/`, `\\`, default is not specified.
 | `commands[].async`                | All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`. |
 | `commands[].runningStatusMessage` | Specify the status bar message when the shell command begin to run, supports variable substitution too. Only works when `runIn=backend`.

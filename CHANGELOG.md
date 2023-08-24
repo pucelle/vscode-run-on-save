@@ -4,6 +4,9 @@
 ## [1.6.0]
 
  - Adds a `terminalHideTimeout` option, to support close terminal automatically after command ran.
+ - Adds a `ignoreFilesBy` option, to support ignore files that listed in like `.gitignore`.
+ - Adds a `args` option, to provide arguments for command, especially for vscode command.
+ 
 
 
 ## [1.5.0]

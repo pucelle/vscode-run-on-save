@@ -203,9 +203,25 @@ export class RunOnSaveExtension {
 	}
 
 	private async runVSCodeCommand(command: VSCodeCommand) {
+		
 		// finishStatusMessage have to be hooked to exit of command execution
 		this.showChannelMessage(`Running "${command.command}"`)
 
-		await vscode.commands.executeCommand(command.command)
+		let args: any[]
+
+		if (Array.isArray(command.args)) {
+			args = command.args
+		}
+		else if (typeof command.args === 'string') {
+			args = [command.args]
+		}
+		else if (typeof command.args === 'object') {
+			args = [command.args]
+		}
+		else {
+			args = []
+		}
+
+		await vscode.commands.executeCommand(command.command, ...args)
 	}
 }

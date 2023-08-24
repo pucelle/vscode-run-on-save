@@ -11,6 +11,7 @@ export interface RawCommand {
 	globMatch: string
 	commandBeforeSaving?: string
 	command?: string
+	args?: string[] | object | string
 	forcePathSeparator?: PathSeparator
 	runIn: string
 	runningStatusMessage: string
@@ -27,6 +28,7 @@ export interface ProcessedCommand {
 	globMatch?: string
 	commandBeforeSaving?: string
 	command?: string
+	args?: string[] | object | string
 	forcePathSeparator?: PathSeparator
 	runIn: string
 	runningStatusMessage: string
@@ -56,6 +58,7 @@ export interface TerminalCommand {
 export interface VSCodeCommand {
 	runIn: 'vscode'
 	command: string
+	args?: string[] | object | string
 	async: boolean
 }
 
@@ -108,7 +111,7 @@ export class CommandProcessor {
 			if (command.runIn === 'backend') {
 				return {
 					runIn: 'backend',
-					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, filePath, true), command.args),
 					runningStatusMessage: this.formatVariables(command.runningStatusMessage, pathSeparator, filePath),
 					finishStatusMessage: this.formatVariables(command.finishStatusMessage, pathSeparator, filePath),
 					async: command.async ?? true,
@@ -117,7 +120,7 @@ export class CommandProcessor {
 			else if (command.runIn === 'terminal') {
 				return {
 					runIn: 'terminal',
-					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, filePath, true), command.args),
 					async: command.async ?? true,
 				} as TerminalCommand
 			}
@@ -125,6 +128,7 @@ export class CommandProcessor {
 				return {
 					runIn: 'vscode',
 					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					args: command.args,
 					async: command.async ?? true,
 				} as VSCodeCommand
 			}
@@ -257,12 +261,44 @@ export class CommandProcessor {
 		return path
 	}
 
-	// `path.dirname` can't handle `\\dir\name`
+	// `path.dirname(...)` can't handle paths like `\\dir\name`.
 	private getDirName(filePath: string): string {
 		let dir = filePath.replace(/[\\\/][^\\\/]+$/, '')
 		if (!dir) {
 			dir = filePath[0] || ''
 		}
 		return dir
+	}
+
+	/** Add args to a command string. */
+	private formatArgs(command: string, args: string[] | object | string | undefined): string {
+		if (!args) {
+			return command
+		}
+
+		if (Array.isArray(args)) {
+			for (let arg of args) {
+				command += ' ' + this.encodeCommandLineToBeQuotedIf(arg)
+			}
+		}
+		else if (typeof args === 'string') {
+			command += ' ' + args
+		}
+		else if (typeof args === 'object') {
+			for (let [key, value] of Object.entries(args)) {
+				command += ' ' + key + ' ' + this.encodeCommandLineToBeQuotedIf(value)
+			}
+		}
+
+		return command
+	}
+
+	/** If piece includes spaces, `\\`, or be quoted, then it must be encoded. */
+	private encodeCommandLineToBeQuotedIf(arg: string) {
+		if (/[\s"]|\\\\/.test(arg)) {
+			arg = '"' + encodeCommandLineToBeQuoted(arg) + '"'
+		}
+
+		return arg
 	}
 }

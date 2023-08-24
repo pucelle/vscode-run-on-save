@@ -100,6 +100,11 @@
 								"description": "Specify the command to be executed after file saved.",
 								"default": "echo ${file}"
 							},
+							"args": {
+								"type": ["string", "array", "object"],
+								"description": "Specify the command parameters, can be a string, array of string, or an object. Note for a `backend` or `terminal` command, if args option is defined as array of string, or an object, will format argument to add quotes if needed. e.g., `['-a', 'Value 1']` will be formatted as `-a \"Value 1\"`",
+								"default": ""
+							},
 							"runIn": {
 								"type": "string",
 								"description": "Run command in.",

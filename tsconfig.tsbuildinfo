@@ -222,8 +222,8 @@
         "affectsGlobalScope": false
       },
       "./src/command-processor.ts": {
-        "version": "bec003b731f3ff660875782535b42f2a2bea3e07f4fd7a9afd79484daec8bd74",
-        "signature": "194f1561d2486929da6e0c9c998276fb0e4d30eaa12376c096b272cedb5927cc",
+        "version": "192a9671f0437cb9b58298d340511aae77759198db0d9b9b215b924e1736a68a",
+        "signature": "55b1f0132a90933de39d9695b0819ac16f6c58e941430fae137ce1852f23a8c6",
         "affectsGlobalScope": false
       },
       "./node_modules/@types/node/ts4.8/assert.d.ts": {
@@ -517,7 +517,7 @@
         "affectsGlobalScope": false
       },
       "./src/run-on-save.ts": {
-        "version": "054fdbd01cddc7f91e60922edfbaecf462e7e8d653d6d0f29cef91902d9448b2",
+        "version": "cdde1c1fd64702c3267530c184e1fa9f7013c0e042e4b39c727c519960931501",
         "signature": "34dd29982980144c10deae2538f1e653b1d39bc1b6734f20d6532e16eb973474",
         "affectsGlobalScope": false
       },
