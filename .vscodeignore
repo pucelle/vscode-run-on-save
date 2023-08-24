@@ -1,6 +1,6 @@
 .vscode/**
 .vscode-test/**
-out/test/**
+test/**
 src/**
 .gitignore
 vsc-extension-quickstart.md
@@ -10,3 +10,17 @@ vsc-extension-quickstart.md
 **/*.ts
 **/*.svg
 **/*.gif
+
+# under node_modules
+**/.github/**
+**/node_modules/**/.*
+**/node_modules/**/@types/**
+**/node_modules/**/test/**
+**/node_modules/**/*.md
+**/node_modules/**/*.markdown
+**/node_modules/**/LICENSE
+**/node_modules/**/license
+**/node_modules/**/README
+**/node_modules/**/readme
+**/node_modules/**/CHANGELOG
+**/node_modules/**/changelog
