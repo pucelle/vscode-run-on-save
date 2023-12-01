@@ -121,12 +121,10 @@ export class RunOnSaveExtension {
 		if (command.runIn === 'backend') {
 			return this.runBackendCommand(command)
 		}
-		else if (command.runIn === 'terminal') {
+		if (command.runIn === 'terminal') {
 			return this.runTerminalCommand(command)
 		}
-		else {
-			return this.runVSCodeCommand(command)
-		}
+		return this.runVSCodeCommand(command)
 	}
 
 	private runBackendCommand(command: BackendCommand) {
