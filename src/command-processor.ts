@@ -178,6 +178,7 @@ export class CommandProcessor {
 			'fileRelative',
 			'cwd',
 			'env',
+			'config',
 		]
 
 		// if white spaces in file name or directory name, we need to wrap them in "".
@@ -191,18 +192,14 @@ export class CommandProcessor {
 				alreadyQuoted = true
 			}
 
-			piece = piece.replace(/\${(?:(\w+):)?(\w+)}/g, (m0: string, prefix: string, name: string) => {
+			piece = piece.replace(/\${(?:(\w+):)?([\w\.]+)}/g, (m0: string, prefix: string, name: string) => {
 				if (variables.includes(prefix || name)) {
-					let value = this.getPathVariableValue(prefix, name, uri)
+					let value = this.getVariableValue(prefix, name, uri)
 					value = this.formatPathSeparator(value, pathSeparator)
 					return value
 				}
 
 				return m0
-			})
-			
-			piece = piece.replace(/\${env\.([\w]+)}/g, (_sub: string, envName: string) => {
-				return envName ? String(process.env[envName]) : ''
 			})
 
 			// If piece includes spaces or `\\`, or be quoted before, then it must be encoded.
@@ -214,11 +211,13 @@ export class CommandProcessor {
 		})
 	}
 
-	/** Get each path variable value from its name. */
-	private getPathVariableValue(prefix: string, name: string, uri: vscode.Uri) {
+	/** Get each variable value from its name. */
+	private getVariableValue(prefix: string, name: string, uri: vscode.Uri) {
 		switch(prefix) {
 			case 'env':
 				return process.env[name] || ''
+			case 'config':
+				return vscode.workspace.getConfiguration("", uri)?.get(name)?.toString() || ''
 		}
 
 		switch(name) {
@@ -226,7 +225,7 @@ export class CommandProcessor {
 				return this.getRootPath(uri)
 
 			case 'workspaceFolderBasename':
-				return path.basename(vscode.workspace.rootPath || '')
+				return path.basename(this.getRootPath(uri))
 
 			case 'file':
 				return uri.fsPath
