@@ -177,6 +177,7 @@ export class CommandProcessor {
 			'fileExtname',
 			'fileRelative',
 			'cwd',
+			'env',
 		]
 
 		// if white spaces in file name or directory name, we need to wrap them in "".
@@ -190,15 +191,14 @@ export class CommandProcessor {
 				alreadyQuoted = true
 			}
 
-			piece = piece.replace(/\${(\w+)}/g, (m0: string, name: string) => {
-				if (variables.includes(name)) {
-					let value = this.getPathVariableValue(name, filePath)
+			piece = piece.replace(/\${(?:(\w+):)?(\w+)}/g, (m0: string, prefix: string, name: string) => {
+				if (variables.includes(prefix || name)) {
+					let value = this.getPathVariableValue(prefix, name, filePath)
 					value = this.formatPathSeparator(value, pathSeparator)
 					return value
 				}
-				else {
-					return m0
-				}
+
+				return m0
 			})
 			
 			piece = piece.replace(/\${env\.([\w]+)}/g, (_sub: string, envName: string) => {
@@ -214,8 +214,13 @@ export class CommandProcessor {
 		})
 	}
 
-	/** Get each path variable value from it's name. */
-	private getPathVariableValue(name: string, filePath: string) {
+	/** Get each path variable value from its name. */
+	private getPathVariableValue(prefix: string, name: string, filePath: string) {
+		switch(prefix) {
+			case 'env':
+				return process.env[name] || ''
+		}
+
 		switch(name) {
 			case 'workspaceFolder':
 				return vscode.workspace.rootPath || ''
