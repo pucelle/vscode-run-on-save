@@ -84,18 +84,18 @@ export class CommandProcessor {
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileBeforeSaving(filePath: string) {
-		return this.prepareCommandsForFile(filePath, true)
+	prepareCommandsForFileBeforeSaving(uri: vscode.Uri) {
+		return this.prepareCommandsForFile(uri, true)
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileAfterSaving(filePath: string) {
-		return this.prepareCommandsForFile(filePath, false)
+	prepareCommandsForFileAfterSaving(uri: vscode.Uri) {
+		return this.prepareCommandsForFile(uri, false)
 	}
 	
 	/** Prepare raw commands to link current working file. */
-	private prepareCommandsForFile(filePath: string, forCommandsAfterSaving: boolean) {
-		let filteredCommands = this.filterCommandsFromFilePath(filePath)
+	private prepareCommandsForFile(uri: vscode.Uri, forCommandsAfterSaving: boolean) {
+		let filteredCommands = this.filterCommandsFromFilePath(uri)
 
 		let processedCommands = filteredCommands.map((command) => {
 			let commandString = forCommandsAfterSaving
@@ -111,23 +111,23 @@ export class CommandProcessor {
 			if (command.runIn === 'backend') {
 				return {
 					runIn: 'backend',
-					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, filePath, true), command.args),
-					runningStatusMessage: this.formatVariables(command.runningStatusMessage, pathSeparator, filePath),
-					finishStatusMessage: this.formatVariables(command.finishStatusMessage, pathSeparator, filePath),
+					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, uri, true), command.args),
+					runningStatusMessage: this.formatVariables(command.runningStatusMessage, pathSeparator, uri),
+					finishStatusMessage: this.formatVariables(command.finishStatusMessage, pathSeparator, uri),
 					async: command.async ?? true,
 				} as BackendCommand
 			}
 			else if (command.runIn === 'terminal') {
 				return {
 					runIn: 'terminal',
-					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, filePath, true), command.args),
+					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, uri, true), command.args),
 					async: command.async ?? true,
 				} as TerminalCommand
 			}
 			else {
 				return {
 					runIn: 'vscode',
-					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					command: this.formatVariables(commandString, pathSeparator, uri, true),
 					args: command.args,
 					async: command.async ?? true,
 				} as VSCodeCommand
@@ -137,22 +137,22 @@ export class CommandProcessor {
 		return processedCommands.filter(v => v) as (BackendCommand | TerminalCommand | VSCodeCommand)[]
 	}
 
-	private filterCommandsFromFilePath(filePath: string): ProcessedCommand[] {
+	private filterCommandsFromFilePath(uri: vscode.Uri): ProcessedCommand[] {
 		return this.commands.filter(({match, notMatch, globMatch}) => {
-			if (match && !match.test(filePath)) {
+			if (match && !match.test(uri.fsPath)) {
 				return false
 			}
 
-			if (notMatch && notMatch.test(filePath)) {
+			if (notMatch && notMatch.test(uri.fsPath)) {
 				return false
 			}
 
 			if (globMatch) {
 				if (/\$\{\w+\}/.test(globMatch)) {
-					globMatch = this.formatVariables(globMatch, undefined, filePath)
+					globMatch = this.formatVariables(globMatch, undefined, uri)
 				}
 
-				if (!minimatch(filePath, globMatch)) {
+				if (!minimatch(uri.fsPath, globMatch)) {
 					return false
 				}
 			}
@@ -161,7 +161,7 @@ export class CommandProcessor {
 		})
 	}
 
-	private formatVariables(commandOrMessage: string, pathSeparator: PathSeparator | undefined, filePath: string, isCommand: boolean = false): string {
+	private formatVariables(commandOrMessage: string, pathSeparator: PathSeparator | undefined, uri: vscode.Uri, isCommand: boolean = false): string {
 		if (!commandOrMessage) {
 			return ''
 		}
@@ -193,7 +193,7 @@ export class CommandProcessor {
 
 			piece = piece.replace(/\${(?:(\w+):)?(\w+)}/g, (m0: string, prefix: string, name: string) => {
 				if (variables.includes(prefix || name)) {
-					let value = this.getPathVariableValue(prefix, name, filePath)
+					let value = this.getPathVariableValue(prefix, name, uri)
 					value = this.formatPathSeparator(value, pathSeparator)
 					return value
 				}
@@ -215,7 +215,7 @@ export class CommandProcessor {
 	}
 
 	/** Get each path variable value from its name. */
-	private getPathVariableValue(prefix: string, name: string, filePath: string) {
+	private getPathVariableValue(prefix: string, name: string, uri: vscode.Uri) {
 		switch(prefix) {
 			case 'env':
 				return process.env[name] || ''
@@ -223,31 +223,31 @@ export class CommandProcessor {
 
 		switch(name) {
 			case 'workspaceFolder':
-				return vscode.workspace.rootPath || ''
+				return this.getRootPath(uri)
 
 			case 'workspaceFolderBasename':
 				return path.basename(vscode.workspace.rootPath || '')
 
 			case 'file':
-				return filePath
+				return uri.fsPath
 
 			case 'fileBasename':
-				return path.basename(filePath)
+				return path.basename(uri.fsPath)
 
 			case 'fileBasenameNoExtension':
-				return path.basename(filePath, path.extname(filePath))
+				return path.basename(uri.fsPath, path.extname(uri.fsPath))
 
 			case 'fileDirname':
-				return this.getDirName(filePath)
+				return this.getDirName(uri.fsPath)
 
 			case 'fileDirnameRelative':
-				return this.getDirName(path.relative(vscode.workspace.rootPath || '', filePath))
+				return this.getDirName(path.relative(this.getRootPath(uri), uri.fsPath))
 
 			case 'fileExtname':
-				return path.extname(filePath)
+				return path.extname(uri.fsPath)
 
 			case 'fileRelative':
-				return path.relative(vscode.workspace.rootPath || '', filePath)
+				return path.relative(this.getRootPath(uri), uri.fsPath)
 
 			case 'cwd':
 				return process.cwd()
@@ -273,6 +273,10 @@ export class CommandProcessor {
 			dir = filePath[0] || ''
 		}
 		return dir
+	}
+
+	private getRootPath(uri: vscode.Uri): string {
+		return vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath || ''
 	}
 
 	/** Add args to a command string. */

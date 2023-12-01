@@ -68,7 +68,7 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		let commandsToRun = this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri.fsPath)
+		let commandsToRun = this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
@@ -83,7 +83,7 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		let commandsToRun = this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri.fsPath)
+		let commandsToRun = this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
