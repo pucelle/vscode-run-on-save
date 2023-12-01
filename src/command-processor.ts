@@ -148,7 +148,7 @@ export class CommandProcessor {
 			}
 
 			if (globMatch) {
-				if (/\$\{\w+\}/.test(globMatch)) {
+				if (/\${((\w+):)?(\w+)}/.test(globMatch)) {
 					globMatch = this.formatVariables(globMatch, undefined, uri)
 				}
 

@@ -48,7 +48,7 @@
 			"properties": {
 				"runOnSave.statusMessageTimeout": {
 					"type": "number",
-					"description": "Sepcify the timeout in millisecond after which the status message will be hidden. Works when `runIn=backend`, can be overwriten by the `statusMessageTimeout` in each command.",
+					"description": "Specify the timeout in millisecond after which the status message will be hidden. Works when `runIn=backend`, can be overwriten by the `statusMessageTimeout` in each command.",
 					"default": 3000
 				},
 				"runOnSave.ignoreFilesBy": {
