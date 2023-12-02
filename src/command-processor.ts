@@ -95,14 +95,14 @@ export class CommandProcessor {
 	
 	/** Prepare raw commands to link current working file. */
 	private prepareCommandsForFile(uri: vscode.Uri, forCommandsAfterSaving: boolean) {
-		let filteredCommands = this.filterCommandsFromFilePath(uri)
+		const filteredCommands = this.filterCommandsFromFilePath(uri)
 
-		let processedCommands = filteredCommands.map((command) => {
-			let commandString = forCommandsAfterSaving
+		const processedCommands = filteredCommands.map((command) => {
+			const commandString = forCommandsAfterSaving
 				? command.commandBeforeSaving
 				: command.command
 
-			let pathSeparator = command.forcePathSeparator
+			const pathSeparator = command.forcePathSeparator
 
 			if (!commandString) {
 				return null
@@ -166,7 +166,7 @@ export class CommandProcessor {
 			return ''
 		}
 
-		let variables = [
+		const variables = [
 			'workspaceFolder',
 			'workspaceFolderBasename', 
 			'file',
@@ -177,6 +177,7 @@ export class CommandProcessor {
 			'fileExtname',
 			'fileRelative',
 			'cwd',
+			'selectedText',
 			'env',
 			'config',
 		]
@@ -184,7 +185,7 @@ export class CommandProcessor {
 		// if white spaces in file name or directory name, we need to wrap them in "".
 		// we doing this by testing each pieces, and wrap them if needed.
 		return commandOrMessage.replace(/\S+/g, (piece: string) => {
-			let oldPiece = piece
+			const oldPiece = piece
 			let alreadyQuoted = false
 
 			if (piece[0] === '"' && piece[piece.length - 1] === '"') {
@@ -213,14 +214,14 @@ export class CommandProcessor {
 
 	/** Get each variable value from its name. */
 	private getVariableValue(prefix: string, name: string, uri: vscode.Uri) {
-		switch(prefix) {
+		switch (prefix) {
 			case 'env':
 				return process.env[name] || ''
 			case 'config':
 				return vscode.workspace.getConfiguration("", uri)?.get(name)?.toString() || ''
 		}
 
-		switch(name) {
+		switch (name) {
 			case 'workspaceFolder':
 				return this.getRootPath(uri)
 
@@ -250,6 +251,10 @@ export class CommandProcessor {
 
 			case 'cwd':
 				return process.cwd()
+			
+			case 'selectedText':
+				const editor = vscode.window.activeTextEditor
+				return editor?.document.getText(editor.selection) || ''
 
 			default:
 				return ''
@@ -267,11 +272,7 @@ export class CommandProcessor {
 
 	// `path.dirname(...)` can't handle paths like `\\dir\name`.
 	private getDirName(filePath: string): string {
-		let dir = filePath.replace(/[\\\/][^\\\/]+$/, '')
-		if (!dir) {
-			dir = filePath[0] || ''
-		}
-		return dir
+		return filePath.replace(/[\\\/][^\\\/]+$/, '') || filePath[0] || ''
 	}
 
 	private getRootPath(uri: vscode.Uri): string {
@@ -285,7 +286,7 @@ export class CommandProcessor {
 		}
 
 		if (Array.isArray(args)) {
-			for (let arg of args) {
+			for (const arg of args) {
 				command += ' ' + this.encodeCommandLineToBeQuotedIf(arg)
 			}
 		}
@@ -293,7 +294,7 @@ export class CommandProcessor {
 			command += ' ' + args
 		}
 		else if (typeof args === 'object') {
-			for (let [key, value] of Object.entries(args)) {
+			for (const [key, value] of Object.entries(args)) {
 				command += ' ' + key + ' ' + this.encodeCommandLineToBeQuotedIf(value)
 			}
 		}
