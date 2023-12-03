@@ -34,7 +34,7 @@ export class RunOnSaveExtension {
 	}
 
 	private showEnablingChannelMessage () {
-		let message = `Run on Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
+		const message = `Run on Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
 		this.showChannelMessage(message)
 		this.showStatusMessage(message)
 	}
@@ -54,7 +54,7 @@ export class RunOnSaveExtension {
 
 	private showStatusMessage(message: string, timeout?: number) {
 		timeout = timeout || this.config.get('statusMessageTimeout') || 3000
-		let disposable = vscode.window.setStatusBarMessage(message, timeout)
+		const disposable = vscode.window.setStatusBarMessage(message, timeout)
 		this.context.subscriptions.push(disposable)
 	}
 
@@ -68,7 +68,7 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		let commandsToRun = this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri)
+		const commandsToRun = await this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
@@ -83,14 +83,14 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		let commandsToRun = this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri)
+		const commandsToRun = await this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
 	}
 
 	private async shouldIgnore(uri: vscode.Uri): Promise<boolean> {
-		let checker = new FileIgnoreChecker({
+		const checker = new FileIgnoreChecker({
 			workspaceDir: vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath,
 			ignoreFilesBy: this.config.get('ignoreFilesBy') || [],
 		})
@@ -99,9 +99,9 @@ export class RunOnSaveExtension {
 	}
 
 	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand)[]) {
-		let promises: Promise<void>[] = []
-		let syncCommands = commands.filter(c => !c.async)
-		let asyncCommands = commands.filter(c => c.async)
+		const promises: Promise<void>[] = []
+		const syncCommands = commands.filter(c => !c.async)
+		const asyncCommands = commands.filter(c => c.async)
 
 		// Run commands in a parallel.
 		for (let command of asyncCommands) {
