@@ -287,10 +287,9 @@ export class CommandProcessor {
 				return process.execPath
 			
 			case 'defaultBuildTask':
-				// TODO: Needs to filter for only build tasks.
-				// Currently returning the first default task.
-				const tasks = await vscode.tasks.fetchTasks()
-				return tasks.find(t => t.group?.isDefault)?.name || ''
+				return (await vscode.tasks.fetchTasks())
+					.find(t => t.group?.id == vscode.TaskGroup.Build.id && t.group.isDefault)
+					?.name || ''
 
 			case 'pathSeparator':
 				return path.sep
