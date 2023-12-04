@@ -70,7 +70,7 @@ export class CommandProcessor {
 
 	private vars = Vars.of({
 		env: name => process.env[name] || '',
-		config: (name, uri) => vscode.workspace.getConfiguration("", uri)?.get(name)?.toString() || '',
+		config: (name, uri) => vscode.workspace.getConfiguration("", uri)?.get<string>(name) || '',
 		command: async name => await vscode.commands.executeCommand(name)
 	})
 
