@@ -60,11 +60,7 @@ export class RunOnSaveExtension {
 
 	/** Returns a promise it was resolved firstly and then save document. */
 	async onWillSaveDocument(document: vscode.TextDocument | vscode.NotebookDocument) {
-		if (!this.getEnabled()) {
-			return
-		}
-
-		if (await this.shouldIgnore(document.uri)) {
+		if (!this.getEnabled() || await this.shouldIgnore(document.uri)) {
 			return
 		}
 
@@ -175,7 +171,7 @@ export class RunOnSaveExtension {
 	}
 
 	private async runTerminalCommand(command: TerminalCommand) {
-		let terminal = this.createTerminal()
+		const terminal = this.createTerminal()
 
 		terminal.show()
 		terminal.sendText(command.command)
@@ -190,7 +186,7 @@ export class RunOnSaveExtension {
 	}
 
 	private createTerminal(): vscode.Terminal {
-		let terminalName = 'Run on Save'
+		const terminalName = 'Run on Save'
 		let terminal = vscode.window.terminals.find(terminal => terminal.name === terminalName)
 
 		if (!terminal) {
@@ -201,8 +197,7 @@ export class RunOnSaveExtension {
 	}
 
 	private async runVSCodeCommand(command: VSCodeCommand) {
-
-		// finishStatusMessage have to be hooked to exit of command execution
+		// finishStatusMessage has to be hooked to exit of command execution
 		this.showChannelMessage(`Running "${command.command}"`)
 
 		let args: any[]

@@ -68,6 +68,32 @@ export class CommandProcessor {
 
 	private commands: ProcessedCommand[] = []
 
+	private vars = Vars.of({
+		env: name => process.env[name] || '',
+		config: (name, uri) => vscode.workspace.getConfiguration("", uri)?.get(name)?.toString() || ''
+	})
+
+	private values = Vars.of({
+		userHome: () => homedir(),
+		workspaceFolder: (uri, scope) => this.getRootPath(uri, scope),
+		workspaceFolderBasename: (uri, scope) => path.basename(this.getRootPath(uri, scope)),
+		file: (uri) => uri.fsPath,
+		fileWorkspaceFolder: (uri) => this.getRootPath(uri),
+		relativeFile: (uri, scope) => path.relative(this.getRootPath(uri, scope), uri.fsPath),
+		relativeFileDirname: (uri, scope) => this.getDirName(path.relative(this.getRootPath(uri, scope), uri.fsPath)),
+		fileBasename: (uri) => path.basename(uri.fsPath),
+		fileBasenameNoExtension: (uri) => path.basename(uri.fsPath, path.extname(uri.fsPath)),
+		fileExtname: (uri) => path.extname(uri.fsPath),
+		fileDirname: (uri) => this.getDirName(uri.fsPath),
+		fileDirnameBasename: (uri) => path.basename(this.getDirName(uri.fsPath)),
+		cwd: () => process.cwd(),
+		lineNumber: () => this.editor?.selection.active.line.toString() || '',
+		selectedText: () => this.editor?.document.getText(this.editor.selection) || '',
+		execPath: () => process.execPath,
+		defaultBuildTask: async () => await this.defaultBuildTask(),
+		pathSeparator: () => path.sep
+	})
+
 	setRawCommands(commands: RawCommand[]) {
 		this.commands = this.processCommands(commands)
 	}
@@ -169,29 +195,6 @@ export class CommandProcessor {
 			return ''
 		}
 
-		const variables = [
-			'userHome',
-			'workspaceFolder',
-			'workspaceFolderBasename',
-			'file',
-			'fileWorkspaceFolder',
-			'relativeFile',
-			'relativeFileDirname',
-			'fileBasename',
-			'fileBasenameNoExtension',
-			'fileExtname',
-			'fileDirname',
-			'fileDirnameBasename',
-			'cwd',
-			'lineNumber',
-			'selectedText',
-			'execPath',
-			'defaultBuildTask',
-			'pathSeparator',
-			'env',
-			'config',
-		]
-
 		// if white spaces in file name or directory name, we need to wrap them in "".
 		// we doing this by testing each pieces, and wrap them if needed.
 		return this.replaceAsync(commandOrMessage, /\S+/g, async (piece: string) => {
@@ -204,10 +207,9 @@ export class CommandProcessor {
 			}
 
 			piece = await this.replaceAsync(piece, /\${(?:(\w+):)?([\w\.]+)}/g, async (m0: string, prefix: string, name: string) => {
-				if (variables.includes(prefix || name)) {
-					let value = await this.getVariableValue(prefix, name, uri)
-					value = this.formatPathSeparator(value, pathSeparator)
-					return value
+				if (this.vars.has(prefix) || this.values.has(name)) {
+					const value = await this.getVariableValue(prefix, name, uri)
+					return this.formatPathSeparator(value, pathSeparator)
 				}
 
 				return m0
@@ -224,79 +226,24 @@ export class CommandProcessor {
 
 	/** Get each variable value from its name. */
 	private async getVariableValue(prefix: string, name: string, uri: vscode.Uri) {
-		let scope
+		let scope = ''
 
 		if (prefix) {
-			switch (prefix) {
-				case 'env':
-					return process.env[name] || ''
-				case 'config':
-					return vscode.workspace.getConfiguration("", uri)?.get(name)?.toString() || ''
+			const values = this.vars.get(prefix)
+			if (values != null) {
+				return values.get(name, uri)
 			}
 
 			[scope, name] = [name, prefix]
 		}
 
-		switch (name) {
-			case 'userHome':
-				return homedir()
+		return this.values.get(name)?.get(uri, scope) || ''
+	}
 
-			case 'workspaceFolder':
-				return this.getRootPath(uri, scope)
-
-			case 'workspaceFolderBasename':
-				return path.basename(this.getRootPath(uri, scope))
-
-			case 'file':
-				return uri.fsPath
-			
-			case 'fileWorkspaceFolder':
-				return this.getRootPath(uri)
-
-			case 'relativeFile':
-				return path.relative(this.getRootPath(uri, scope), uri.fsPath)
-
-			case 'relativeFileDirname':
-				return this.getDirName(path.relative(this.getRootPath(uri, scope), uri.fsPath))
-
-			case 'fileBasename':
-				return path.basename(uri.fsPath)
-
-			case 'fileBasenameNoExtension':
-				return path.basename(uri.fsPath, path.extname(uri.fsPath))
-
-			case 'fileExtname':
-				return path.extname(uri.fsPath)
-
-			case 'fileDirname':
-				return this.getDirName(uri.fsPath)
-
-			case 'fileDirnameBasename':
-				return path.basename(this.getDirName(uri.fsPath))
-
-			case 'cwd':
-				return process.cwd()
-
-			case 'lineNumber':
-				return this.editor?.selection.active.line.toString() || ''
-			
-			case 'selectedText':
-				return this.editor?.document.getText(this.editor.selection) || ''
-			
-			case 'execPath':
-				return process.execPath
-			
-			case 'defaultBuildTask':
-				return (await vscode.tasks.fetchTasks())
-					.find(t => t.group?.id == vscode.TaskGroup.Build.id && t.group.isDefault)
-					?.name || ''
-
-			case 'pathSeparator':
-				return path.sep
-
-			default:
-				return ''
-		}
+	private async defaultBuildTask() {
+		return (await vscode.tasks.fetchTasks())
+			.find(t => t.group?.id == vscode.TaskGroup.Build.id && t.group.isDefault)
+			?.name || ''
 	}
 
 	/** Replace path separators. */
@@ -365,3 +312,23 @@ export class CommandProcessor {
 		return vscode.window.activeTextEditor
 	}
 }
+
+class Vars {
+	private constructor() {}
+
+	public static of(fns: { [prefix: string]: VarFn}) {
+		return new Map(Object.entries(fns).map(
+			([name, fn]) => [name, new Var(fn)]
+		))
+	}
+}
+
+class Var {
+	constructor(private fn: VarFn) {}
+
+	public get(...args: any[]): Promise<string> {
+		return Promise.resolve(this.fn(...args))
+	}
+}
+
+type VarFn = (...args: any[]) => string | Promise<string>
