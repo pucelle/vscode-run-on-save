@@ -3,7 +3,7 @@ import {RunOnSaveExtension} from './run-on-save';
 
 
 export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
-	let extension = new RunOnSaveExtension(context)
+	const extension = new RunOnSaveExtension(context)
 
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration(() => {

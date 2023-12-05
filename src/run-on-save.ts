@@ -71,11 +71,7 @@ export class RunOnSaveExtension {
 	}
 
 	async onDocumentSaved(document: vscode.TextDocument) {
-		if (!this.getEnabled()) {
-			return
-		}
-
-		if (await this.shouldIgnore(document.uri)) {
+		if (!this.getEnabled() || await this.shouldIgnore(document.uri)) {
 			return
 		}
 
@@ -100,13 +96,12 @@ export class RunOnSaveExtension {
 		const asyncCommands = commands.filter(c => c.async)
 
 		// Run commands in a parallel.
-		for (let command of asyncCommands) {
-			let promise = this.runACommand(command)
-			promises.push(promise)
+		for (const command of asyncCommands) {
+			promises.push(this.runACommand(command))
 		}
 
 		// Run commands in series.
-		for (let command of syncCommands) {
+		for (const command of syncCommands) {
 			await this.runACommand(command)
 		}
 
@@ -131,7 +126,7 @@ export class RunOnSaveExtension {
 				this.showStatusMessage(command.runningStatusMessage, command.statusMessageTimeout)
 			}
 	
-			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
+			const child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
 			child.stdout!.on('data', data => this.channel.append(data.toString()))
 			child.stderr!.on('data', data => this.channel.append(data.toString()))
 	
@@ -150,20 +145,10 @@ export class RunOnSaveExtension {
 	}
 
 	private execShellCommand(command: string, workingDirectoryAsCWD: boolean): ChildProcess {
-		let cwd = workingDirectoryAsCWD ? vscode.workspace.rootPath : undefined
+		const cwd = workingDirectoryAsCWD ? vscode.workspace.workspaceFolders?.[0].uri.fsPath : undefined
+		const shell = this.getShellPath()
 
-		let shell = this.getShellPath()
-		if (shell) {
-			return exec(command, {
-				shell,
-				cwd,
-			})
-		}
-		else {
-			return exec(command, {
-				cwd,
-			})
-		}
+		return shell ? exec(command, { shell, cwd }) : exec(command, { cwd })
 	}
 
 	private getShellPath(): string | undefined {

@@ -37,7 +37,7 @@ export interface ProcessedCommand {
 	async?: boolean
 }
 
-/** The commands in list will be picked by current editting file path. */
+/** The commands in list will be picked by current editing file path. */
 export interface BackendCommand {
 	runIn: 'backend'
 	command: string
@@ -123,7 +123,7 @@ export class CommandProcessor {
 	
 	/** Prepare raw commands to link current working file. */
 	private async prepareCommandsForFile(uri: vscode.Uri, forCommandsAfterSaving: boolean) {
-		let preparedCommands = []
+		const preparedCommands = []
 
 		for (const command of await this.filterCommandsFromFilePath(uri)) {
 			const commandString = forCommandsAfterSaving
@@ -164,7 +164,7 @@ export class CommandProcessor {
 	}
 
 	private async filterCommandsFromFilePath(uri: vscode.Uri): Promise<ProcessedCommand[]> {
-		let filteredCommands = []
+		const filteredCommands = []
 
 		for (const command of this.commands) {
 			let {match, notMatch, globMatch} = command
@@ -249,11 +249,7 @@ export class CommandProcessor {
 
 	/** Replace path separators. */
 	private formatPathSeparator(path: string, pathSeparator: string | undefined) {
-		if (pathSeparator) {
-			path = path.replace(/[\\|\/]/g, pathSeparator)
-		}
-
-		return path
+		return pathSeparator ? path.replace(/[\\|\/]/g, pathSeparator) : path
 	}
 
 	// `path.dirname(...)` can't handle paths like `\\dir\name`.
@@ -262,7 +258,6 @@ export class CommandProcessor {
 	}
 
 	private getRootPath(uri: vscode.Uri, scope?: string): string {
-		// TODO: get workspace when specified: vsCode.Uri.joinPath
 		uri = scope ? vscode.Uri.file(scope) : uri
 		return vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath || ''
 	}
