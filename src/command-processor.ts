@@ -1,7 +1,8 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
-import {encodeCommandLineToBeQuoted, decodeQuotedCommandLine} from './util'
+import { encodeCommandLineToBeQuoted, decodeQuotedCommandLine } from './util'
 import * as minimatch from 'minimatch'
+import { homedir } from 'os'
 
 
 /** Raw command configured by user. */
@@ -36,7 +37,7 @@ export interface ProcessedCommand {
 	async?: boolean
 }
 
-/** The commands in list will be picked by current editting file path. */
+/** The commands in list will be picked by current editing file path. */
 export interface BackendCommand {
 	runIn: 'backend'
 	command: string
@@ -67,6 +68,33 @@ export class CommandProcessor {
 
 	private commands: ProcessedCommand[] = []
 
+	private vars = Vars.of({
+		env: name => process.env[name] || '',
+		config: (name, uri) => vscode.workspace.getConfiguration("", uri)?.get<string>(name) || '',
+		command: async name => await vscode.commands.executeCommand(name)
+	})
+
+	private values = Vars.of({
+		userHome: () => homedir(),
+		workspaceFolder: (uri, scope) => this.getRootPath(uri, scope),
+		workspaceFolderBasename: (uri, scope) => path.basename(this.getRootPath(uri, scope)),
+		file: (uri) => uri.fsPath,
+		fileWorkspaceFolder: (uri) => this.getRootPath(uri),
+		relativeFile: (uri, scope) => path.relative(this.getRootPath(uri, scope), uri.fsPath),
+		relativeFileDirname: (uri, scope) => this.getDirName(path.relative(this.getRootPath(uri, scope), uri.fsPath)),
+		fileBasename: (uri) => path.basename(uri.fsPath),
+		fileBasenameNoExtension: (uri) => path.basename(uri.fsPath, path.extname(uri.fsPath)),
+		fileExtname: (uri) => path.extname(uri.fsPath),
+		fileDirname: (uri) => this.getDirName(uri.fsPath),
+		fileDirnameBasename: (uri) => path.basename(this.getDirName(uri.fsPath)),
+		cwd: () => process.cwd(),
+		lineNumber: () => this.editor?.selection.active.line.toString() || '',
+		selectedText: () => this.editor?.document.getText(this.editor.selection) || '',
+		execPath: () => process.execPath,
+		defaultBuildTask: async () => await this.defaultBuildTask(),
+		pathSeparator: () => path.sep
+	})
+
 	setRawCommands(commands: RawCommand[]) {
 		this.commands = this.processCommands(commands)
 	}
@@ -84,105 +112,94 @@ export class CommandProcessor {
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileBeforeSaving(filePath: string) {
-		return this.prepareCommandsForFile(filePath, true)
+	prepareCommandsForFileBeforeSaving(uri: vscode.Uri) {
+		return this.prepareCommandsForFile(uri, true)
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileAfterSaving(filePath: string) {
-		return this.prepareCommandsForFile(filePath, false)
+	prepareCommandsForFileAfterSaving(uri: vscode.Uri) {
+		return this.prepareCommandsForFile(uri, false)
 	}
 	
 	/** Prepare raw commands to link current working file. */
-	private prepareCommandsForFile(filePath: string, forCommandsAfterSaving: boolean) {
-		let filteredCommands = this.filterCommandsFromFilePath(filePath)
+	private async prepareCommandsForFile(uri: vscode.Uri, forCommandsAfterSaving: boolean) {
+		const preparedCommands = []
 
-		let processedCommands = filteredCommands.map((command) => {
-			let commandString = forCommandsAfterSaving
-				? command.commandBeforeSaving
-				: command.command
-
-			let pathSeparator = command.forcePathSeparator
+		for (const command of await this.filterCommandsFromFilePath(uri)) {
+			const commandString = forCommandsAfterSaving
+			? command.commandBeforeSaving
+			: command.command
 
 			if (!commandString) {
-				return null
+				continue
 			}
+
+			const pathSeparator = command.forcePathSeparator
 
 			if (command.runIn === 'backend') {
-				return {
+				preparedCommands.push({
 					runIn: 'backend',
-					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, filePath, true), command.args),
-					runningStatusMessage: this.formatVariables(command.runningStatusMessage, pathSeparator, filePath),
-					finishStatusMessage: this.formatVariables(command.finishStatusMessage, pathSeparator, filePath),
-					async: command.async ?? true,
-				} as BackendCommand
-			}
-			else if (command.runIn === 'terminal') {
-				return {
+					command: this.formatArgs(await this.formatVariables(commandString, pathSeparator, uri, true), command.args),
+					runningStatusMessage: await this.formatVariables(command.runningStatusMessage, pathSeparator, uri),
+					finishStatusMessage: await this.formatVariables(command.finishStatusMessage, pathSeparator, uri),
+					async: command.async ?? true,			
+				} as BackendCommand)
+			} else if (command.runIn === 'terminal') {
+				preparedCommands.push({
 					runIn: 'terminal',
-					command: this.formatArgs(this.formatVariables(commandString, pathSeparator, filePath, true), command.args),
+					command: this.formatArgs(await this.formatVariables(commandString, pathSeparator, uri, true), command.args),
 					async: command.async ?? true,
-				} as TerminalCommand
-			}
-			else {
-				return {
+				} as TerminalCommand)
+			} else {
+				preparedCommands.push({
 					runIn: 'vscode',
-					command: this.formatVariables(commandString, pathSeparator, filePath, true),
+					command: await this.formatVariables(commandString, pathSeparator, uri, true),
 					args: command.args,
 					async: command.async ?? true,
-				} as VSCodeCommand
+				} as VSCodeCommand)
 			}
-		})
+		}
 
-		return processedCommands.filter(v => v) as (BackendCommand | TerminalCommand | VSCodeCommand)[]
+		return preparedCommands
 	}
 
-	private filterCommandsFromFilePath(filePath: string): ProcessedCommand[] {
-		return this.commands.filter(({match, notMatch, globMatch}) => {
-			if (match && !match.test(filePath)) {
-				return false
-			}
+	private async filterCommandsFromFilePath(uri: vscode.Uri): Promise<ProcessedCommand[]> {
+		const filteredCommands = []
 
-			if (notMatch && notMatch.test(filePath)) {
-				return false
+		for (const command of this.commands) {
+			let {match, notMatch, globMatch} = command
+			if (match && !match.test(uri.fsPath)) {
+				continue
+			}
+			if (notMatch && notMatch.test(uri.fsPath)) {
+				continue
 			}
 
 			if (globMatch) {
-				if (/\$\{\w+\}/.test(globMatch)) {
-					globMatch = this.formatVariables(globMatch, undefined, filePath)
+				if (/\${(?:\w+:)?[\w\.]+}/.test(globMatch)) {
+					globMatch = await this.formatVariables(globMatch, undefined, uri)
 				}
 
-				if (!minimatch(filePath, globMatch)) {
-					return false
+				if (!minimatch(uri.fsPath, globMatch)) {
+					continue
 				}
 			}
 
-			return true
-		})
+			filteredCommands.push(command)
+		}
+
+		return filteredCommands
 	}
 
-	private formatVariables(commandOrMessage: string, pathSeparator: PathSeparator | undefined, filePath: string, isCommand: boolean = false): string {
+	private async formatVariables(commandOrMessage: string, pathSeparator: PathSeparator | undefined, uri: vscode.Uri, isCommand: boolean = false): Promise<string> {
 		if (!commandOrMessage) {
 			return ''
 		}
 
-		let variables = [
-			'workspaceFolder',
-			'workspaceFolderBasename', 
-			'file',
-			'fileBasename',
-			'fileBasenameNoExtension', 
-			'fileDirname',
-			'fileDirnameRelative',
-			'fileExtname',
-			'fileRelative',
-			'cwd',
-		]
-
 		// if white spaces in file name or directory name, we need to wrap them in "".
 		// we doing this by testing each pieces, and wrap them if needed.
-		return commandOrMessage.replace(/\S+/g, (piece: string) => {
-			let oldPiece = piece
+		return this.replaceAsync(commandOrMessage, /\S+/g, async (piece: string) => {
+			const oldPiece = piece
 			let alreadyQuoted = false
 
 			if (piece[0] === '"' && piece[piece.length - 1] === '"') {
@@ -190,19 +207,13 @@ export class CommandProcessor {
 				alreadyQuoted = true
 			}
 
-			piece = piece.replace(/\${(\w+)}/g, (m0: string, name: string) => {
-				if (variables.includes(name)) {
-					let value = this.getPathVariableValue(name, filePath)
-					value = this.formatPathSeparator(value, pathSeparator)
-					return value
+			piece = await this.replaceAsync(piece, /\${(?:(\w+):)?([\w\.]+)}/g, async (m0: string, prefix: string, name: string) => {
+				if (this.vars.has(prefix) || this.values.has(name)) {
+					const value = await this.getVariableValue(prefix, name, uri)
+					return this.formatPathSeparator(value, pathSeparator)
 				}
-				else {
-					return m0
-				}
-			})
-			
-			piece = piece.replace(/\${env\.([\w]+)}/g, (_sub: string, envName: string) => {
-				return envName ? String(process.env[envName]) : ''
+
+				return m0
 			})
 
 			// If piece includes spaces or `\\`, or be quoted before, then it must be encoded.
@@ -214,60 +225,41 @@ export class CommandProcessor {
 		})
 	}
 
-	/** Get each path variable value from it's name. */
-	private getPathVariableValue(name: string, filePath: string) {
-		switch(name) {
-			case 'workspaceFolder':
-				return vscode.workspace.rootPath || ''
+	/** Get each variable value from its name. */
+	private async getVariableValue(prefix: string, name: string, uri: vscode.Uri) {
+		let scope = ''
 
-			case 'workspaceFolderBasename':
-				return path.basename(vscode.workspace.rootPath || '')
+		if (prefix) {
+			const values = this.vars.get(prefix)
+			if (values != null) {
+				return values.get(name, uri)
+			}
 
-			case 'file':
-				return filePath
-
-			case 'fileBasename':
-				return path.basename(filePath)
-
-			case 'fileBasenameNoExtension':
-				return path.basename(filePath, path.extname(filePath))
-
-			case 'fileDirname':
-				return this.getDirName(filePath)
-
-			case 'fileDirnameRelative':
-				return this.getDirName(path.relative(vscode.workspace.rootPath || '', filePath))
-
-			case 'fileExtname':
-				return path.extname(filePath)
-
-			case 'fileRelative':
-				return path.relative(vscode.workspace.rootPath || '', filePath)
-
-			case 'cwd':
-				return process.cwd()
-
-			default:
-				return ''
+			[scope, name] = [name, prefix]
 		}
+
+		return this.values.get(name)?.get(uri, scope) || ''
+	}
+
+	private async defaultBuildTask() {
+		return (await vscode.tasks.fetchTasks())
+			.find(t => t.group?.id == vscode.TaskGroup.Build.id && t.group.isDefault)
+			?.name || ''
 	}
 
 	/** Replace path separators. */
 	private formatPathSeparator(path: string, pathSeparator: string | undefined) {
-		if (pathSeparator) {
-			path = path.replace(/[\\|\/]/g, pathSeparator)
-		}
-
-		return path
+		return pathSeparator ? path.replace(/[\\|\/]/g, pathSeparator) : path
 	}
 
 	// `path.dirname(...)` can't handle paths like `\\dir\name`.
 	private getDirName(filePath: string): string {
-		let dir = filePath.replace(/[\\\/][^\\\/]+$/, '')
-		if (!dir) {
-			dir = filePath[0] || ''
-		}
-		return dir
+		return filePath.replace(/[\\\/][^\\\/]+$/, '') || filePath[0] || ''
+	}
+
+	private getRootPath(uri: vscode.Uri, scope?: string): string {
+		uri = scope ? vscode.Uri.file(scope) : uri
+		return vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath || ''
 	}
 
 	/** Add args to a command string. */
@@ -277,7 +269,7 @@ export class CommandProcessor {
 		}
 
 		if (Array.isArray(args)) {
-			for (let arg of args) {
+			for (const arg of args) {
 				command += ' ' + this.encodeCommandLineToBeQuotedIf(arg)
 			}
 		}
@@ -285,7 +277,7 @@ export class CommandProcessor {
 			command += ' ' + args
 		}
 		else if (typeof args === 'object') {
-			for (let [key, value] of Object.entries(args)) {
+			for (const [key, value] of Object.entries(args)) {
 				command += ' ' + key + ' ' + this.encodeCommandLineToBeQuotedIf(value)
 			}
 		}
@@ -293,7 +285,7 @@ export class CommandProcessor {
 		return command
 	}
 
-	/** If piece includes spaces, `\\`, or be quoted, then it must be encoded. */
+	/** If piece includes spaces, `\\`, or is quoted, then it must be encoded. */
 	private encodeCommandLineToBeQuotedIf(arg: string) {
 		if (/[\s"]|\\\\/.test(arg)) {
 			arg = '"' + encodeCommandLineToBeQuoted(arg) + '"'
@@ -301,4 +293,38 @@ export class CommandProcessor {
 
 		return arg
 	}
+
+	private async replaceAsync(str: string, searchValue: RegExp, replacer: (...matches: string[]) => Promise<string>): Promise<string> {
+		const replacements = await Promise.all(
+			Array.from(str.matchAll(searchValue),
+			match => replacer(...match))
+		);
+
+		let i = 0;
+		return str.replace(searchValue, () => replacements[i++]);
+	}
+
+	private get editor() {
+		return vscode.window.activeTextEditor
+	}
 }
+
+class Vars {
+	private constructor() {}
+
+	public static of(fns: { [prefix: string]: VarFn}) {
+		return new Map(Object.entries(fns).map(
+			([name, fn]) => [name, new Var(fn)]
+		))
+	}
+}
+
+class Var {
+	constructor(private fn: VarFn) {}
+
+	public get(...args: any[]): Promise<string> {
+		return Promise.resolve(this.fn(...args))
+	}
+}
+
+type VarFn = (...args: any[]) => string | Promise<string>
