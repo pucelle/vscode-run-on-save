@@ -6,6 +6,7 @@ src/**
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/tslint.json
+**/*.tsbuildinfo
 **/*.map
 **/*.ts
 **/*.svg

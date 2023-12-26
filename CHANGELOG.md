@@ -1,13 +1,18 @@
 # ChangeLog
 
 
+## [1.7.0]
+
+ - Merges jackwhelpton@github's pull request, supports more variables.
+ - Adjusts test settings.
+
+
 ## [1.6.0]
 
  - Adds a `terminalHideTimeout` option, to support close terminal automatically after command ran.
  - Adds a `ignoreFilesBy` option, to support ignore files that listed in like `.gitignore`.
  - Adds a `args` option, to provide arguments for command, especially for vscode command.
  
-
 
 ## [1.5.0]
 
@@ -21,23 +26,23 @@
 
 ## [1.4.0]
 
- - Support `forcePathSeparator` option.
+ - Supports `forcePathSeparator` option.
 
 
 ## [1.3.1]
 
- - Support `${fileRelative}`.
+ - Supports `${fileRelative}`.
 
 
 ## [1.3.0]
 
- - Support `commandBeforeSaving`.
- - Support `globMatch` to make it easier to specifies file matcher.
+ - Supports `commandBeforeSaving`.
+ - Supports `globMatch` to make it easier to specifies file matcher.
 
 
 ## [1.2.0]
 
- - Support vscode command, Thanks to Hulvdan@github.
+ - Supports vscode command, Thanks to Hulvdan@github.
 
 
 ## [1.1.0]

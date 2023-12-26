@@ -88,21 +88,44 @@ Can be used in `command`, `runningStatusMessage`, `finishStatusMessage`, `globMa
 
 Note that if `forcePathSeparator` specified, separators in these variables will be replaced.
 
-For more details please refer to [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
-
-| Name                         | Description
+| Variable                     | Description
 | ---                          | ---
 | `${workspaceFolder}`         | the path of the folder opened in VS Code.
 | `${workspaceFolderBasename}` | the name of the folder opened in VS Code without any slashes (/).
 | `${file}`                    | the path of current opened file.
 | `${fileBasename}`            | the basename part of current opened file.
 | `${fileBasenameNoExtension}` | the basename part without extension of current opened file.
-| `${fileDirname}`             | the dirname path part of current opened file.
-| `${fileDirnameRelative}`     | the relative dirname path part of current opened file.
 | `${fileExtname}`             | the extension part of current opened file.
-| `${fileRelative}`            | the shorter relative path from current vscode working directory.
+| `${fileRelative}`            | the shorter relative file path part from current vscode working directory.
+| `${fileDirname}`             | the dirname path part of current opened file.
+| `${fileDirnameBasename}`     | the basename of dirname path part of current opened file.
+| `${fileDirnameRelative}`     | the shorter relative dirname path part from current vscode working directory.
 | `${cwd}`                     | the task runner's current working directory on startup.
-| `${env.Name}`                | reference environment variables.
+| `${userHome}`                | current user's system home directory.
+| `${lineNumber}`              | number of active line in vscode editor.
+| `${selectedText}`            | selected text in vscode editor.
+| `${execPath}`                | absolute pathname of the vscode process. 
+| `${defaultBuildTaskName}`    | default build task name of current project.
+| `${pathSeparator}`           | path seperator based on system.
+| `${env:envName}`             | reference environment variable `envName`.
+| `${config:vsConfigName}`     | reference vscode configuration name `vsConfigName`.
+| `${command:vsCommandName}`   | execute vscode command `vsCommandName`, and reference returned result.
+
+
+To better distinguish file path associated variables, assume you have opened a workspace located at `/Users/UserName/ProjectName`, and you are editing `folderName/subFolderName/fileName.css` inside of it, then:
+
+| Variable                     | Value
+| ---                          | ---
+| `${workspaceFolder}`         | `/Users/UserName/ProjectName`
+| `${workspaceFolderBasename}` | `ProjectName`
+| `${file}`                    | `/Users/UserName/ProjectName/folderName/subFolderName/fileName.css`
+| `${fileBasename}`            | `fileName.css`
+| `${fileBasenameNoExtension}` | `fileName`
+| `${fileExtname}`             | `css`
+| `${fileRelative}`            | `folderName/subFolderName/fileName.css`
+| `${fileDirname}`             | `/Users/UserName/ProjectName/folderName/subFolderName`
+| `${fileDirnameBasename}`     | `subFolderName`
+| `${fileDirnameRelative}`     | `folderName/subFolderName`
 
 
 
@@ -116,7 +139,7 @@ The following commands are exposed in the command palette
 
 ## References
 
-This plugin inspired from these plugins:
+This plugin inspired from these 2 plugins:
 
 [vscode-runonsave](https://github.com/emeraldwalk/vscode-runonsave) and [vscode-save-and-run](https://github.com/wk-j/vscode-save-and-run).
 

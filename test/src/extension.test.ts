@@ -15,29 +15,30 @@ suite("Extension Tests", () => {
 			'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
 			'runningStatusMessage': 'Compiling ${fileBasename}',
 			'finishStatusMessage': '${fileBasename} compiled',
+			'forcePathSeparator': '/',
 		}])
 
-		test('will compile scss file in backend', function () {
-			let commands = manager.prepareCommandsForFileAfterSaving(Uri.file('folderName/fileName.scss'))
+		test('will compile scss file in backend', async function () {
+			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName.scss'))
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
-				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
+				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
 			}])
 		})
 
-		test('will exclude scss file that file name starts with "_"', function () {
-			let commands = manager.prepareCommandsForFileAfterSaving(Uri.file('folderName/_fileName.scss'))
+		test('will exclude scss file that file name starts with "_"', async function () {
+			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/_fileName.scss'))
 			assert.deepStrictEqual(commands, [])
 		})
 		
-		test('will escape white spaces', function () {
-			let commands = manager.prepareCommandsForFileAfterSaving(Uri.file('folderName/fileName 1.scss'))
+		test('will escape white spaces', async function () {
+			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName 1.scss'))
 			assert.deepStrictEqual(
 				commands[0].command,
-				'node-sass "folderName/fileName 1.scss" "folderName/fileName 1.css"'
+				'node-sass "c:/folderName/fileName 1.scss" "c:/folderName/fileName 1.css"'
 			)
 		})
 	})
@@ -52,13 +53,14 @@ suite("Extension Tests", () => {
 			'runningStatusMessage': 'Compiling ${fileBasename}',
 			'finishStatusMessage': '${fileBasename} compiled',
 			'async': true,
+			'forcePathSeparator': '/',
 		}])
 
-		test('will compile scss file in backend', function () {
-			let commands = manager.prepareCommandsForFileAfterSaving(Uri.file('folderName/fileName.scss'))
+		test('will compile scss file in backend', async function () {
+			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName.scss'))
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
-				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
+				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
@@ -76,13 +78,14 @@ suite("Extension Tests", () => {
 			'runningStatusMessage': 'Compiling ${fileBasename}',
 			'finishStatusMessage': '${fileBasename} compiled',
 			'async': true,
+			'forcePathSeparator': '/',
 		}])
 
-		test('will compile scss file in backend', function () {
-			let commands = manager.prepareCommandsForFileBeforeSaving(Uri.file('folderName/fileName.scss'))
+		test('will compile scss file in backend', async function () {
+			let commands = await manager.prepareCommandsForFileBeforeSaving(Uri.file('C:/folderName/fileName.scss'))
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
-				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
+				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
@@ -102,8 +105,8 @@ suite("Extension Tests", () => {
 			'finishStatusMessage': '${fileBasename} compiled',
 		}])
 
-		test('will escape paths starts with "\\\\"', function () {
-			let commands = manager.prepareCommandsForFileAfterSaving(Uri.file('\\\\folderName\\fileName 1.scss'))
+		test('will escape paths starts with "\\\\"', async function () {
+			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('\\\\folderName\\fileName 1.scss'))
 			assert.deepStrictEqual(
 				commands[0].command,
 				'node-sass "\\\\folderName\\fileName 1.scss" "\\\\folderName\\fileName 1.css"'
@@ -118,14 +121,15 @@ suite("Extension Tests", () => {
 			'match': '.*\\.scss$',
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'terminal',
-			'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css'
+			'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
+			'forcePathSeparator': '/',
 		}])
 
-		test('will compile scss file in terminal', function () {
-			let commands = manager.prepareCommandsForFileAfterSaving(Uri.file('folderName/fileName.scss'))
+		test('will compile scss file in terminal', async function () {
+			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName.scss'))
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'terminal',
-				'command': 'node-sass folderName/fileName.scss folderName/fileName.css',
+				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
 				'async': true,
 			}])
 		})
@@ -137,14 +141,15 @@ suite("Extension Tests", () => {
 		manager.setRawCommands([<RawCommand>{
 			"match": ".*\\.drawio$",
 			"runIn": "backend",
-			"command": "draw.io --crop --export -f pdf \"${file}\""
+			"command": "draw.io --crop --export -f pdf \"${file}\"",
+			'forcePathSeparator': '/',
 		}])
 
-		test('will compile it right', function () {
-			let commands = manager.prepareCommandsForFileAfterSaving(Uri.file('test.drawio'))
+		test('will compile it right', async function () {
+			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/test.drawio'))
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
-				'command': 'draw.io --crop --export -f pdf "test.drawio"',
+				'command': 'draw.io --crop --export -f pdf "c:/test.drawio"',
 				'finishStatusMessage': '',
 				'runningStatusMessage': '',
 				'async': true,

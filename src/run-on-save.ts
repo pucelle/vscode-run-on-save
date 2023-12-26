@@ -34,7 +34,7 @@ export class RunOnSaveExtension {
 	}
 
 	private showEnablingChannelMessage () {
-		const message = `Run on Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
+		let message = `Run on Save is ${this.getEnabled() ? 'enabled' : 'disabled'}`
 		this.showChannelMessage(message)
 		this.showStatusMessage(message)
 	}
@@ -54,7 +54,7 @@ export class RunOnSaveExtension {
 
 	private showStatusMessage(message: string, timeout?: number) {
 		timeout = timeout || this.config.get('statusMessageTimeout') || 3000
-		const disposable = vscode.window.setStatusBarMessage(message, timeout)
+		let disposable = vscode.window.setStatusBarMessage(message, timeout)
 		this.context.subscriptions.push(disposable)
 	}
 
@@ -64,7 +64,7 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		const commandsToRun = await this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri)
+		let commandsToRun = await this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
@@ -75,14 +75,14 @@ export class RunOnSaveExtension {
 			return
 		}
 
-		const commandsToRun = await this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri)
+		let commandsToRun = await this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
 	}
 
 	private async shouldIgnore(uri: vscode.Uri): Promise<boolean> {
-		const checker = new FileIgnoreChecker({
+		let checker = new FileIgnoreChecker({
 			workspaceDir: vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath,
 			ignoreFilesBy: this.config.get('ignoreFilesBy') || [],
 		})
@@ -91,17 +91,17 @@ export class RunOnSaveExtension {
 	}
 
 	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand)[]) {
-		const promises: Promise<void>[] = []
-		const syncCommands = commands.filter(c => !c.async)
-		const asyncCommands = commands.filter(c => c.async)
+		let promises: Promise<void>[] = []
+		let syncCommands = commands.filter(c => !c.async)
+		let asyncCommands = commands.filter(c => c.async)
 
 		// Run commands in a parallel.
-		for (const command of asyncCommands) {
+		for (let command of asyncCommands) {
 			promises.push(this.runACommand(command))
 		}
 
 		// Run commands in series.
-		for (const command of syncCommands) {
+		for (let command of syncCommands) {
 			await this.runACommand(command)
 		}
 
@@ -112,10 +112,12 @@ export class RunOnSaveExtension {
 		if (command.runIn === 'backend') {
 			return this.runBackendCommand(command)
 		}
-		if (command.runIn === 'terminal') {
+		else if (command.runIn === 'terminal') {
 			return this.runTerminalCommand(command)
 		}
-		return this.runVSCodeCommand(command)
+		else {
+			return this.runVSCodeCommand(command)
+		}
 	}
 
 	private runBackendCommand(command: BackendCommand) {
@@ -126,7 +128,7 @@ export class RunOnSaveExtension {
 				this.showStatusMessage(command.runningStatusMessage, command.statusMessageTimeout)
 			}
 	
-			const child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
+			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
 			child.stdout!.on('data', data => this.channel.append(data.toString()))
 			child.stderr!.on('data', data => this.channel.append(data.toString()))
 	
@@ -145,8 +147,8 @@ export class RunOnSaveExtension {
 	}
 
 	private execShellCommand(command: string, workingDirectoryAsCWD: boolean): ChildProcess {
-		const cwd = workingDirectoryAsCWD ? vscode.workspace.workspaceFolders?.[0].uri.fsPath : undefined
-		const shell = this.getShellPath()
+		let cwd = workingDirectoryAsCWD ? vscode.workspace.workspaceFolders?.[0].uri.fsPath : undefined
+		let shell = this.getShellPath()
 
 		return shell ? exec(command, { shell, cwd }) : exec(command, { cwd })
 	}
@@ -156,7 +158,7 @@ export class RunOnSaveExtension {
 	}
 
 	private async runTerminalCommand(command: TerminalCommand) {
-		const terminal = this.createTerminal()
+		let terminal = this.createTerminal()
 
 		terminal.show()
 		terminal.sendText(command.command)
@@ -171,7 +173,7 @@ export class RunOnSaveExtension {
 	}
 
 	private createTerminal(): vscode.Terminal {
-		const terminalName = 'Run on Save'
+		let terminalName = 'Run on Save'
 		let terminal = vscode.window.terminals.find(terminal => terminal.name === terminalName)
 
 		if (!terminal) {
@@ -182,20 +184,22 @@ export class RunOnSaveExtension {
 	}
 
 	private async runVSCodeCommand(command: VSCodeCommand) {
-		// finishStatusMessage has to be hooked to exit of command execution
+		// `finishStatusMessage` has to be hooked to exit of command execution.
 		this.showChannelMessage(`Running "${command.command}"`)
 
-		const args = ((args) => {
-			if (Array.isArray(args)) {
-				return args
-			}
-			const argsType = typeof args
-			if (['string', 'object'].some(t => t === argsType)) {
-				return [args]
-			}
-			return []
-		})(command.args)
-
+		let args = this.formatVSCodeCommandArgs(command.args)
 		await vscode.commands.executeCommand(command.command, ...args)
+	}
+	
+	private formatVSCodeCommandArgs(args: string | object | string[] | undefined): any[] {
+		if (Array.isArray(args)) {
+			return args
+		}
+
+		if (['string', 'object'].includes(typeof args)) {
+			return [args]
+		}
+
+		return []
 	}
 }

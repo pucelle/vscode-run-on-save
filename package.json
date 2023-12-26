@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.6.0",
+	"version": "1.7.0",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -164,8 +164,7 @@
 		"vscode:prepublish": "npm run build",
 		"build": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
-		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "cd test && tsc -b && node ../node_modules/vscode/bin/test"
+		"test": "cd test && tsc -b && vscode-test"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.1",
@@ -173,6 +172,8 @@
 		"@types/mocha": "^2.2.48",
 		"@types/node": "^20.5.4",
 		"@types/vscode": "^1.81.0",
+		"@vscode/test-cli": "0.0.4",
+		"@vscode/test-electron": "^2.3.8",
 		"typescript": "^4.9.5"
 	},
 	"dependencies": {
