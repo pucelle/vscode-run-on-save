@@ -28,7 +28,7 @@
 		"compile files on save"
 	],
 	"activationEvents": [
-		"*"
+		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
