@@ -109,7 +109,7 @@ export class RunOnSaveExtension {
 	}
 
 	private runACommand(command: BackendCommand | TerminalCommand | VSCodeCommand): Promise<void> {
-		if (this.config.get('clearOutput')) {
+		if (command.clearOutput) {
 			this.channel.clear()
 		}
 
