@@ -18,21 +18,6 @@
 				"${workspaceFolder}/out/**/*.js"
 			],
 			"preLaunchTask": "npm: watch"
-		},
-		{
-			"name": "Extension Tests",
-			"type": "extensionHost",
-			"request": "launch",
-			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--disable-extensions",
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/test/out"
-			],
-			"outFiles": [
-				"${workspaceFolder}/test/out/**/*.js"
-			],
-			"preLaunchTask": "npm: watch"
 		}
 	]
 }

@@ -26,6 +26,7 @@ suite("Extension Tests", () => {
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
+				'clearOutput': false,
 			}])
 		})
 
@@ -64,6 +65,7 @@ suite("Extension Tests", () => {
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
+				'clearOutput': false,
 			}])
 		})
 	})
@@ -89,6 +91,7 @@ suite("Extension Tests", () => {
 				'runningStatusMessage': 'Compiling fileName.scss',
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
+				'clearOutput': false,
 			}])
 		})
 	})
@@ -131,6 +134,7 @@ suite("Extension Tests", () => {
 				'runIn': 'terminal',
 				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
 				'async': true,
+				'clearOutput': false,
 			}])
 		})
 	})
@@ -153,6 +157,7 @@ suite("Extension Tests", () => {
 				'finishStatusMessage': '',
 				'runningStatusMessage': '',
 				'async': true,
+				'clearOutput': false,
 			}])
 		})
 	})
