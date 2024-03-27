@@ -42,8 +42,7 @@ export namespace CommandVariables {
 		return filePath.replace(/[\\\/][^\\\/]+$/, '') || filePath[0] || ''
 	}
 
-	function getRootPath(uri: vscode.Uri, scope?: string): string {
-		uri = scope ? vscode.Uri.file(scope) : uri
+	function getRootPath(uri: vscode.Uri): string {
 		return vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath || ''
 	}
 

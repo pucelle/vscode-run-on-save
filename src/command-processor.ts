@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import {formatCommandPieces, encodeCommandLineToBeQuotedIf} from './util'
 import * as minimatch from 'minimatch'
 import {CommandVariables} from './command-variables'
+import * as path from 'path'
 
 
 type PathSeparator = '/' | '\\'
@@ -150,27 +151,56 @@ export class CommandProcessor {
 
 		for (let command of this.commands) {
 			let {match, notMatch, globMatch} = command
-			if (match && !match.test(uri.fsPath)) {
-				continue
-			}
-			if (notMatch && notMatch.test(uri.fsPath)) {
+
+			if (!this.doMatchTest(match, notMatch, uri)) {
 				continue
 			}
 
-			if (globMatch) {
-				if (/\${(?:\w+:)?[\w\.]+}/.test(globMatch)) {
-					globMatch = await this.formatVariables(globMatch, undefined, uri)
-				}
-
-				if (!minimatch(uri.fsPath, globMatch)) {
-					continue
-				}
+			if (!await this.doGlobMatchTest(globMatch, uri)) {
+				continue
 			}
 
 			filteredCommands.push(command)
 		}
 
 		return filteredCommands
+	}
+
+	private doMatchTest(match: RegExp | undefined, notMatch: RegExp | undefined, uri: vscode.Uri): boolean {
+		if (match && !match.test(uri.fsPath)) {
+			return false
+		}
+
+		if (notMatch && notMatch.test(uri.fsPath)) {
+			return false
+		}
+
+		return true
+	}
+
+	private async doGlobMatchTest(globMatch: string | undefined, uri: vscode.Uri): Promise<boolean> {
+		if (!globMatch) {
+			return true
+		}
+
+		if (/\${(?:\w+:)?[\w\.]+}/.test(globMatch)) {
+			globMatch = await this.formatVariables(globMatch, undefined, uri)
+		}
+
+		let gm = new minimatch.Minimatch(globMatch) 
+
+		// If match whole path.
+		if (gm.match(uri.fsPath)) {
+			return true
+		}
+
+		// Or match relative path.
+		let relativePath = path.relative(vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath || '', uri.fsPath)
+		if (gm.match(relativePath)) {
+			return true
+		}
+
+		return false
 	}
 
 	private async formatCommandString(command: string, pathSeparator: PathSeparator | undefined, uri: vscode.Uri): Promise<string> {
