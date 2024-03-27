@@ -28,7 +28,7 @@
 		"compile files on save"
 	],
 	"activationEvents": [
-		"*"
+		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -153,6 +153,11 @@
 								"type": "boolean",
 								"description": "Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.",
 								"default": true
+							},
+							"clearOutput": {
+								"type": "boolean",
+								"description": "Clear the output channel before running. Default value is `false`.",
+								"default": false
 							}
 						}
 					}

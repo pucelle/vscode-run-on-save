@@ -19,6 +19,7 @@ export interface RawCommand {
 	runningStatusMessage: string
 	finishStatusMessage: string
 	async?: boolean
+	clearOutput?: boolean
 }
 
 /** Processed command, which can be run directly. */
@@ -34,6 +35,7 @@ export interface ProcessedCommand {
 	runningStatusMessage: string
 	finishStatusMessage: string
 	async?: boolean
+	clearOutput?: boolean
 }
 
 /** The commands in list will be picked by current editing file path. */
@@ -45,6 +47,7 @@ export interface BackendCommand {
 	workingDirectoryAsCWD: boolean
 	async: boolean
 	statusMessageTimeout?: number
+	clearOutput?: boolean
 }
 
 export interface TerminalCommand {
@@ -53,6 +56,7 @@ export interface TerminalCommand {
 	async: boolean
 	statusMessageTimeout?: number
 	terminalHideTimeout?: number
+	clearOutput?: boolean
 }
 
 export interface VSCodeCommand {
@@ -60,6 +64,7 @@ export interface VSCodeCommand {
 	command: string
 	args?: string[] | object | string
 	async: boolean
+	clearOutput?: boolean
 }
 
 
@@ -114,7 +119,8 @@ export class CommandProcessor {
 					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, uri), command.args),
 					runningStatusMessage: await this.formatVariables(command.runningStatusMessage, pathSeparator, uri),
 					finishStatusMessage: await this.formatVariables(command.finishStatusMessage, pathSeparator, uri),
-					async: command.async ?? true,			
+					async: command.async ?? true,
+					clearOutput: command.clearOutput ?? false,
 				} as BackendCommand)
 			}
 			else if (command.runIn === 'terminal') {
@@ -122,6 +128,7 @@ export class CommandProcessor {
 					runIn: 'terminal',
 					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, uri), command.args),
 					async: command.async ?? true,
+					clearOutput: command.clearOutput ?? false,
 				} as TerminalCommand)
 			}
 			else {
@@ -130,6 +137,7 @@ export class CommandProcessor {
 					command: await this.formatCommandString(commandString, pathSeparator, uri),
 					args: command.args,
 					async: command.async ?? true,
+					clearOutput: command.clearOutput ?? false,
 				} as VSCodeCommand)
 			}
 		}

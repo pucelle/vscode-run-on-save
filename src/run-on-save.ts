@@ -109,6 +109,10 @@ export class RunOnSaveExtension {
 	}
 
 	private runACommand(command: BackendCommand | TerminalCommand | VSCodeCommand): Promise<void> {
+		if (command.clearOutput) {
+			this.channel.clear()
+		}
+
 		if (command.runIn === 'backend') {
 			return this.runBackendCommand(command)
 		}
