@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -71,6 +71,100 @@
 				"runOnSave.commands": {
 					"type": "array",
 					"description": "Shell commands array.",
+					"default": [],
+					"items": {
+						"type": "object",
+						"properties": {
+							"match": {
+								"type": "string",
+								"description": "Specify a RegExp source to match file path. Note if specifies both `match` and `globMatch`, commands matched them both will be executed.",
+								"default": ""
+							},
+							"notMatch": {
+								"type": "string",
+								"description": "Specify a RegExp source, the files whole path match it will be excluded.",
+								"default": ""
+							},
+							"globMatch": {
+								"type": "string",
+								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer. Note if specifies both `match` and `globMatch`, only commands matched them both will be executed.",
+								"default": ""
+							},
+							"commandBeforeSaving": {
+								"type": "string",
+								"description": "Specify the command to be executed before saving the file. Note that for backend command, file will be saved after command executed completed.",
+								"default": "echo ${file}"
+							},
+							"command": {
+								"type": "string",
+								"description": "Specify the command to be executed after file saved.",
+								"default": "echo ${file}"
+							},
+							"args": {
+								"type": [
+									"string",
+									"array",
+									"object"
+								],
+								"description": "Specify the command parameters, can be a string, array of string, or an object. Note for a `backend` or `terminal` command, if args option is defined as array of string, or an object, will format argument to add quotes if needed. e.g., `['-a', 'Value 1']` will be formatted as `-a \"Value 1\"`",
+								"default": ""
+							},
+							"runIn": {
+								"type": "string",
+								"description": "Run command in.",
+								"enum": [
+									"backend",
+									"terminal",
+									"vscode"
+								],
+								"default": "backend",
+								"enumDescriptions": [
+									"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feekback. Choose this when you don't want to be disturbed.",
+									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details.",
+									"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
+								]
+							},
+							"async": {
+								"type": "boolean",
+								"description": "All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`.",
+								"default": true
+							},
+							"runningStatusMessage": {
+								"type": "string",
+								"description": "Specify the status bar message when the shell command began to run. Only works when `runIn=backend`.",
+								"default": ""
+							},
+							"finishStatusMessage": {
+								"type": "string",
+								"description": "Specify the status bar message after the shell command finished executing. Only works when `runIn=backend`.",
+								"default": ""
+							},
+							"statusMessageTimeout": {
+								"type": "number",
+								"description": "Sepcify the timeout in millisecond after which the status message will hide. Only works when `runIn=backend`.",
+								"default": 3000
+							},
+							"terminalHideTimeout": {
+								"type": "number",
+								"description": "Sepcify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
+								"default": -1
+							},
+							"workingDirectoryAsCWD": {
+								"type": "boolean",
+								"description": "Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.",
+								"default": true
+							},
+							"clearOutput": {
+								"type": "boolean",
+								"description": "Clear the output channel before running. Default value is `false`.",
+								"default": false
+							}
+						}
+					}
+				},
+				"runOnSave.commandsBeforeSaving": {
+					"type": "array",
+					"description": "Shell commands array, just like `runOnSave.commands`, but runs before saving documents.",
 					"default": [],
 					"items": {
 						"type": "object",
