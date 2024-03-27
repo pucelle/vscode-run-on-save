@@ -25,10 +25,10 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | ---                              | ---
 | `runOnSave.statusMessageTimeout` | Specify the default timeout milliseconds after which the status bar message will hide, default value is `3000`, means 3 seconds.
 | `runOnSave.ignoreFilesBy`        | Specifies it to ignore files that list in `.gitignore` or `.npmignore`. default value is empty list.
+| `runOnSave.shell`                | Specify in which shell the commands are executed, defaults to the default vscode shell.
+| `runOnSave.defaultRunIn`         | Specify default `runIn` for all the commands, it equals to `vscode` if not specified.
 | `runOnSave.commands`             | Specify the array of commands to execute and related info, its child options as below.
 | `runOnSave.commandBeforeSaving`  | Same format as `runOnSave.commands`, but runs it before saving action happens, and document is not saved yet.
-| `runOnSave.shell`                | Specify in which shell the commands are executed, defaults to the default vscode shell.
-
 
 ### Command Options
 
@@ -47,7 +47,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `commands[].terminalHideTimeout`  | Sepcify the timeout in milliseconds after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.
 | `commands[].workingDirectoryAsCWD`| Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.
 | `commands[].clearOutput`          | Clear the output channel before running current command. Default value is `false`.
-| `commands[].runIn`                | See list below.
+| `commands[].runIn`                | See list below. Default value is specified by `runOnSave.defaultRunIn`, or `vscode`.
  - `backend`: Run command silently and show messages in output channel, you can specify runningStatusMessage and finishStatusMessage to give you a little feekback. Choose this when you don't want to be disturbed.
  - `terminal`: Run command in vscode terminal, which keeps message colors. Choose this when you want to get feedback details.
  - `vscode`: Run vscode's command. Choose this if you want to execute vscode's own command or a command of a particular extension.

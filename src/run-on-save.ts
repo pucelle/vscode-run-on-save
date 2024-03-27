@@ -10,6 +10,7 @@ export interface Configuration {
 	ignoreFilesBy: string[]
 	shell: String
 	commands: RawCommand
+	defaultRunIn: 'backend' | 'terminal' | 'vscode'
 }
 
 export class RunOnSaveExtension {
@@ -113,14 +114,16 @@ export class RunOnSaveExtension {
 			this.channel.clear()
 		}
 
-		if (command.runIn === 'backend') {
-			return this.runBackendCommand(command)
+		let runIn = command.runIn || this.config.get('defaultRunIn')
+
+		if (runIn === 'backend') {
+			return this.runBackendCommand(command as BackendCommand)
 		}
-		else if (command.runIn === 'terminal') {
-			return this.runTerminalCommand(command)
+		else if (runIn === 'terminal') {
+			return this.runTerminalCommand(command as TerminalCommand)
 		}
 		else {
-			return this.runVSCodeCommand(command)
+			return this.runVSCodeCommand(command as VSCodeCommand)
 		}
 	}
 

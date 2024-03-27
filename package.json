@@ -68,6 +68,21 @@
 					"description": "Specify what shell will be used for all the commands. Default is vscode's default shell.",
 					"default": null
 				},
+				"runOnSave.defaultRunIn": {
+					"type": "string",
+					"description": "Run command in which environment by default. Default value is `vscode`.",
+					"enum": [
+						"backend",
+						"terminal",
+						"vscode"
+					],
+					"default": "vscode",
+					"enumDescriptions": [
+						"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feekback. Choose this when you don't want to be disturbed.",
+						"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details.",
+						"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
+					]
+				},
 				"runOnSave.commands": {
 					"type": "array",
 					"description": "Shell commands array.",
@@ -111,7 +126,7 @@
 							},
 							"runIn": {
 								"type": "string",
-								"description": "Run command in.",
+								"description": "Run command in which environment, if not specified, uses `runOnSave.defaultRunIn`.",
 								"enum": [
 									"backend",
 									"terminal",
