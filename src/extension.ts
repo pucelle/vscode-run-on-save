@@ -29,6 +29,10 @@ export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
 		vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
 			extension.onDocumentSaved(document)
 		}),
+
+		vscode.workspace.onDidSaveNotebookDocument((document: vscode.NotebookDocument) => {
+			extension.onDocumentSaved(document)
+		}),
 	)
 
 	return extension

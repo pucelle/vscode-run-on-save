@@ -70,7 +70,7 @@ export class RunOnSaveExtension {
 		}
 	}
 
-	async onDocumentSaved(document: vscode.TextDocument) {
+	async onDocumentSaved(document: vscode.TextDocument | vscode.NotebookDocument) {
 		if (!this.getEnabled() || await this.shouldIgnore(document.uri)) {
 			return
 		}
