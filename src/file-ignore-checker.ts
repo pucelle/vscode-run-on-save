@@ -36,7 +36,7 @@ export class FileIgnoreChecker {
 
 		let workspaceDir = this.workspaceDir
 		
-		// Not in current working dirctory, never ignore.
+		// Not in current working directory, never ignore.
 		if (workspaceDir && !path.normalize(filePath).startsWith(workspaceDir)) {
 			return false
 		}

@@ -19,11 +19,11 @@ export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
 		}),
 
 		vscode.workspace.onWillSaveTextDocument((e: vscode.TextDocumentWillSaveEvent) => {
-			e.waitUntil(extension.onWillSaveDocument(e.document))
+			e.waitUntil(extension.onWillSaveDocument(e.document, e.reason))
 		}),
 
 		vscode.workspace.onWillSaveNotebookDocument((e: vscode.NotebookDocumentWillSaveEvent) => {
-			e.waitUntil(extension.onWillSaveDocument(e.notebook))
+			e.waitUntil(extension.onWillSaveDocument(e.notebook, e.reason))
 		}),
 
 		vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
@@ -32,6 +32,10 @@ export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
 
 		vscode.workspace.onDidSaveNotebookDocument((document: vscode.NotebookDocument) => {
 			extension.onDocumentSaved(document)
+		}),
+
+		vscode.workspace.onDidDeleteFiles((e: vscode.FileDeleteEvent) => {
+			extension.onDidDeleteFiles(e)
 		}),
 	)
 
