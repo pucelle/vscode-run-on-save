@@ -20,12 +20,16 @@ export class RunOnSaveExtension {
 	private channel: vscode.OutputChannel = vscode.window.createOutputChannel('Run on Save')
 	private commandProcessor: CommandProcessor = new CommandProcessor()
 
+	// A record of document uris to document versions to save reasons.
+	private documentSaveReason: Record<string, Record<number, vscode.TextDocumentSaveReason>>
+
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
 		this.loadConfig()
 		this.showEnablingChannelMessage()
 
 		context.subscriptions.push(this.channel)
+		this.documentSaveReason = {}
 	}
 
 	/** Load or reload configuration. */
@@ -60,8 +64,11 @@ export class RunOnSaveExtension {
 	}
 
 	/** Returns a promise it was resolved firstly and then save document. */
-	async onWillSaveDocument(document: vscode.TextDocument | vscode.NotebookDocument) {
-		if (!this.getEnabled() || await this.shouldIgnore(document.uri)) {
+	async onWillSaveDocument(document: vscode.TextDocument | vscode.NotebookDocument, reason: vscode.TextDocumentSaveReason) {
+		this.documentSaveReason[document.uri.fsPath] ??= {}
+		this.documentSaveReason[document.uri.fsPath][document.version] = reason
+
+		if (!this.getEnabled() || await this.shouldIgnore(document.uri, reason)) {
 			return
 		}
 
@@ -72,7 +79,14 @@ export class RunOnSaveExtension {
 	}
 
 	async onDocumentSaved(document: vscode.TextDocument | vscode.NotebookDocument) {
-		if (!this.getEnabled() || await this.shouldIgnore(document.uri)) {
+		const documentVersions = this.documentSaveReason[document.uri.fsPath]
+		const reason = documentVersions?.[document.version]
+
+		if (documentVersions != null) {
+			delete documentVersions[document.version]
+		}
+
+		if (!this.getEnabled() || await this.shouldIgnore(document.uri, reason)) {
 			return
 		}
 
@@ -82,7 +96,17 @@ export class RunOnSaveExtension {
 		}
 	}
 
-	private async shouldIgnore(uri: vscode.Uri): Promise<boolean> {
+	async onDidDeleteFiles(e: vscode.FileDeleteEvent) {
+		for (const uri of e.files) {
+			delete this.documentSaveReason[uri.fsPath]
+		}
+	}
+
+	private async shouldIgnore(uri: vscode.Uri, reason: vscode.TextDocumentSaveReason): Promise<boolean> {
+		if (reason !== vscode.TextDocumentSaveReason.Manual && this.config.get('onlyRunOnManualSave')) {
+			return true
+		}
+
 		let checker = new FileIgnoreChecker({
 			workspaceDir: vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath,
 			ignoreFilesBy: this.config.get('ignoreFilesBy') || [],
