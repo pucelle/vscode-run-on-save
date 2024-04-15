@@ -3,6 +3,7 @@ import * as path from 'path'
 import {Uri} from 'vscode'
 import {RawCommand, CommandProcessor} from '../../out/command-processor'
 import {FileIgnoreChecker} from '../../out/file-ignore-checker'
+import {FleetingDoubleKeysCache} from '../../out/util'
 
 
 suite("Extension Tests", () => {
@@ -179,6 +180,33 @@ suite("Extension Tests", () => {
 
 		test('will not ignore file 3', async () => {
 			assert.ok(!await checker.shouldIgnore(path.resolve(__dirname, 'index.ts')))
+		})
+	})
+
+
+	suite('test for #40, class FleetingDoubleKeysCache', function () {
+		let cache = new FleetingDoubleKeysCache<string, number, string>(100)
+
+		test('will cache item', async () => {
+			cache.set('a', 1, 'value')
+			assert.equal(cache.get('a', 1), 'value')
+			cache.clear()
+		})
+
+		test('will cache item for a while', async () => {
+			cache.set('a', 1, 'value')
+			await new Promise(resolve => setTimeout(resolve, 100))
+			assert.equal(cache.get('a', 1), 'value')
+			await new Promise(resolve => setTimeout(resolve, 50))
+			assert.equal(cache.get('a', 1), 'value')
+			cache.clear()
+		})
+
+		test('will clear after enough time', async () => {
+			cache.set('a', 1, 'value')
+			await new Promise(resolve => setTimeout(resolve, 250))
+			assert.equal(cache.get('a', 1), undefined)
+			cache.clear()
 		})
 	})
 })

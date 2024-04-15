@@ -26,8 +26,8 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `runOnSave.statusMessageTimeout` | Specify the default timeout milliseconds after which the status bar message will hide, default value is `3000`, means 3 seconds.
 | `runOnSave.ignoreFilesBy`        | Specifies it to ignore files that list in `.gitignore` or `.npmignore`. default value is empty list.
 | `runOnSave.shell`                | Specify in which shell the commands are executed, defaults to the default vscode shell.
-| `runOnSave.defaultRunIn`         | Specify default `runIn` for all the commands, it equals to `vscode` if not specified.
-| `runOnSave.onlyRunOnManualSave`  | Whether to only run commands when a file is manually saved, defaults to false.
+| `runOnSave.defaultRunIn`         | Specify default `commands[].runIn` for all the commands, it equals to `vscode` if not specified.
+| `runOnSave.onlyRunOnManualSave`  | Whether to only run commands when a file is manually saved, defaults to `false`.
 | `runOnSave.commands`             | Specify the array of commands to execute and related info, its child options as below.
 
 ### Command Options

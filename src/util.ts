@@ -69,3 +69,116 @@ export async function replaceAsync(str: string, re: RegExp, replacer: (...matche
 	let i = 0
 	return str.replace(re, () => replacements[i++])
 }
+
+
+/** All cache values exist for more than 3 seconds, but less than 6 seconds. */
+export class FleetingDoubleKeysCache<K1, K2, V> {
+
+	private timeoutMs: number
+	private mapCurr: DoubleKeysMap<K1, K2, V> = new DoubleKeysMap()
+	private mapBack: DoubleKeysMap<K1, K2, V> = new DoubleKeysMap()
+	private timeout: any | null = null
+
+	constructor(timeoutMs: number = 3000) {
+		this.timeoutMs = timeoutMs
+	}
+
+	get(k1: K1, k2: K2): V | undefined {
+		return this.mapCurr.get(k1, k2)
+			?? this.mapBack.get(k1, k2)
+	}
+
+	set(k1: K1, k2: K2, v: V) {
+		this.mapCurr.set(k1, k2, v)
+		this.setSwapTimeout()
+	}
+
+	firstKeyCount(): number {
+		return this.mapCurr.firstKeyCount() + this.mapBack.firstKeyCount()
+	}
+
+	clear() {
+		this.mapCurr.clear()
+		this.mapBack.clear()
+	}
+
+	private setSwapTimeout() {
+		if (this.timeout === null) {
+			this.timeout = setTimeout(this.onSwapTimeout.bind(this), this.timeoutMs)
+		}
+	}
+
+	private onSwapTimeout() {
+		[this.mapCurr, this.mapBack] = [this.mapBack, this.mapCurr]
+		this.mapCurr.clear()
+		this.timeout = null
+
+		// Need to swap a more time if has any values cached.
+		if (this.firstKeyCount() > 0) {
+			this.setSwapTimeout()
+		}
+	}
+}
+
+
+/** 
+ * `K1 -> K2 -> V` Map Struct.
+ * Index each value by a pair of keys.
+ */
+class DoubleKeysMap<K1, K2, V> {
+
+	private map: Map<K1, Map<K2, V>> = new Map()
+
+	/** Has associated value by key pair. */
+	has(k1: K1, k2: K2): boolean {
+		let sub = this.map.get(k1)
+		if (!sub) {
+			return false
+		}
+
+		return sub.has(k2)
+	}
+
+	/** Get the count of all the first keys. */
+	firstKeyCount(): number {
+		return this.map.size
+	}
+
+	/** Get associated value by key pair. */
+	get(k1: K1, k2: K2): V | undefined {
+		let sub = this.map.get(k1)
+		if (!sub) {
+			return undefined
+		}
+
+		return sub.get(k2)
+	}
+
+	/** Set key pair and associated value. */
+	set(k1: K1, k2: K2, v: V) {
+		let sub = this.map.get(k1)
+		if (!sub) {
+			sub = new Map()
+			this.map.set(k1, sub)
+		}
+
+		sub.set(k2, v)
+	}
+
+	/** Delete all the associated values by key pair. */
+	delete(k1: K1, k2: K2) {
+		let sub = this.map.get(k1)
+		if (sub) {
+			sub.delete(k2)
+
+			if (sub.size === 0) {
+				this.map.delete(k1)
+			}
+		}
+	}
+
+	/** Clear all the data. */
+	clear() {
+		this.map = new Map()
+	}
+}

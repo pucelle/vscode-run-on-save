@@ -1,11 +1,17 @@
 # ChangeLog
 
 
+## [1.8.0]
+ - Supports `onlyRunOnManualSave` option, to limit running commands only for manually save.
+ - Fixes the wrong `commandBeforeSaving` usage description.
+
+
 ## [1.7.1]
 
  - Merges CyprusSocialite@github's pull request, supports `clearOutput` option, and adjust plugin activation time.
  - Supports `commandBeforeSaving`, to specifies commands before saving document.
  - `globMatch` can be specified as a relative path, which will be used to match file path relative to current workspace directory.
+
 
 ## [1.7.0]
 

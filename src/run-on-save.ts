@@ -1,7 +1,7 @@
 import {exec, ChildProcess} from 'child_process'
 import * as vscode from 'vscode'
 import {RawCommand, CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand} from './command-processor'
-import {timeout} from './util'
+import {FleetingDoubleKeysCache, timeout} from './util'
 import {FileIgnoreChecker} from './file-ignore-checker'
 
 
@@ -20,8 +20,8 @@ export class RunOnSaveExtension {
 	private channel: vscode.OutputChannel = vscode.window.createOutputChannel('Run on Save')
 	private commandProcessor: CommandProcessor = new CommandProcessor()
 
-	// A record of document uris to document versions to save reasons.
-	private documentSaveReason: Record<string, Record<number, vscode.TextDocumentSaveReason>>
+	/** A record of document uris and document versions to save reasons. */
+	private documentSaveReasonCache: FleetingDoubleKeysCache<string, number, vscode.TextDocumentSaveReason> = new FleetingDoubleKeysCache()
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
@@ -29,7 +29,6 @@ export class RunOnSaveExtension {
 		this.showEnablingChannelMessage()
 
 		context.subscriptions.push(this.channel)
-		this.documentSaveReason = {}
 	}
 
 	/** Load or reload configuration. */
@@ -59,14 +58,14 @@ export class RunOnSaveExtension {
 
 	private showStatusMessage(message: string, timeout?: number) {
 		timeout = timeout || this.config.get('statusMessageTimeout') || 3000
+		
 		let disposable = vscode.window.setStatusBarMessage(message, timeout)
 		this.context.subscriptions.push(disposable)
 	}
 
-	/** Returns a promise it was resolved firstly and then save document. */
+	/** Returns a promise it was resolved firstly and then will save document. */
 	async onWillSaveDocument(document: vscode.TextDocument | vscode.NotebookDocument, reason: vscode.TextDocumentSaveReason) {
-		this.documentSaveReason[document.uri.fsPath] ??= {}
-		this.documentSaveReason[document.uri.fsPath][document.version] = reason
+		this.documentSaveReasonCache.set(document.uri.fsPath, document.version, reason)
 
 		if (!this.getEnabled() || await this.shouldIgnore(document.uri, reason)) {
 			return
@@ -79,12 +78,7 @@ export class RunOnSaveExtension {
 	}
 
 	async onDocumentSaved(document: vscode.TextDocument | vscode.NotebookDocument) {
-		const documentVersions = this.documentSaveReason[document.uri.fsPath]
-		const reason = documentVersions?.[document.version]
-
-		if (documentVersions != null) {
-			delete documentVersions[document.version]
-		}
+		let reason = this.documentSaveReasonCache.get(document.uri.fsPath, document.version)
 
 		if (!this.getEnabled() || await this.shouldIgnore(document.uri, reason)) {
 			return
@@ -96,13 +90,7 @@ export class RunOnSaveExtension {
 		}
 	}
 
-	async onDidDeleteFiles(e: vscode.FileDeleteEvent) {
-		for (const uri of e.files) {
-			delete this.documentSaveReason[uri.fsPath]
-		}
-	}
-
-	private async shouldIgnore(uri: vscode.Uri, reason: vscode.TextDocumentSaveReason): Promise<boolean> {
+	private async shouldIgnore(uri: vscode.Uri, reason: vscode.TextDocumentSaveReason | undefined): Promise<boolean> {
 		if (reason !== vscode.TextDocumentSaveReason.Manual && this.config.get('onlyRunOnManualSave')) {
 			return true
 		}

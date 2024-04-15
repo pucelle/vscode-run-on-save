@@ -33,10 +33,6 @@ export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {
 		vscode.workspace.onDidSaveNotebookDocument((document: vscode.NotebookDocument) => {
 			extension.onDocumentSaved(document)
 		}),
-
-		vscode.workspace.onDidDeleteFiles((e: vscode.FileDeleteEvent) => {
-			extension.onDidDeleteFiles(e)
-		}),
 	)
 
 	return extension
