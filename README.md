@@ -28,7 +28,6 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `runOnSave.shell`                | Specify in which shell the commands are executed, defaults to the default vscode shell.
 | `runOnSave.defaultRunIn`         | Specify default `runIn` for all the commands, it equals to `vscode` if not specified.
 | `runOnSave.commands`             | Specify the array of commands to execute and related info, its child options as below.
-| `runOnSave.commandBeforeSaving`  | Same format as `runOnSave.commands`, but runs it before saving action happens, and document is not saved yet.
 
 ### Command Options
 
@@ -38,6 +37,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `commands[].notMatch`             | Specify a RegExp source, the file that whole path match it will be excluded. E.g.: `[\\\\\\/]_[\\w-]+\\.scss$` can be used to exclude scss library files.
 | `commands[].globMatch`            | Specify a glob expression, used to match the whole file path or the relative path that relative to current workspace directory. the matched files will be included. E.g.: `**/*.scss` will match all scss files, `*.scss` will match all scss files directly in current workspace directory.
 | `commands[].command`              | Specify the shell command to execute. You may include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
+| `commands[].commandBeforeSaving`  | Same as `commands`, but runs it before saving action happens, and document is not saved yet.
 | `commands[].args`                 | Specify the command parameters, can be a string, array of string, or an object.
 | `commands[].forcePathSeparator`   | Force path separator in variable substitution to be `/`, `\\`, default is not specified.
 | `commands[].async`                | All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`. |
