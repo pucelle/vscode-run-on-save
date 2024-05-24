@@ -46,7 +46,7 @@ export class RunOnSaveExtension {
 	private showChannelMessage(message: string) {
 		this.channel.appendLine(message)
 	}
-	
+
 	getEnabled(): boolean {
 		return !!this.context.globalState.get('enabled', true)
 	}
@@ -58,7 +58,7 @@ export class RunOnSaveExtension {
 
 	private showStatusMessage(message: string, timeout?: number) {
 		timeout = timeout || this.config.get('statusMessageTimeout') || 3000
-		
+
 		let disposable = vscode.window.setStatusBarMessage(message, timeout)
 		this.context.subscriptions.push(disposable)
 	}
@@ -146,17 +146,17 @@ export class RunOnSaveExtension {
 			if (command.runningStatusMessage) {
 				this.showStatusMessage(command.runningStatusMessage, command.statusMessageTimeout)
 			}
-	
+
 			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
 			child.stdout!.on('data', data => this.channel.append(data.toString()))
 			child.stderr!.on('data', data => this.channel.append(data.toString()))
-	
+
 			child.on('exit', (e) => {
 				if (e === 0 && command.finishStatusMessage) {
 					this.showStatusMessage(command.finishStatusMessage, command.statusMessageTimeout)
 				}
-	
-				if (e !== 0) {
+
+				if (e !== 0 && !command.doNotDisturb) {
 					this.channel.show(true)
 				}
 
@@ -209,7 +209,7 @@ export class RunOnSaveExtension {
 		let args = this.formatVSCodeCommandArgs(command.args)
 		await vscode.commands.executeCommand(command.command, ...args)
 	}
-	
+
 	private formatVSCodeCommandArgs(args: string | object | string[] | undefined): any[] {
 		if (Array.isArray(args)) {
 			return args
