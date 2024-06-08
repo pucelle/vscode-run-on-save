@@ -213,7 +213,7 @@ export class CommandProcessor {
 		}
 
 		// If white spaces exist in file name or directory name, we need to wrap them with `""`.
-		// We do this by testing each pieces, and wrap them if needed.
+		// We do this by testing each piece, and wrap them if needed.
 		return formatCommandPieces(command, async (piece) => {
 			return CommandVariables.format(piece, uri, pathSeparator)
 		})

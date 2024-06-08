@@ -1,6 +1,10 @@
 # ChangeLog
 
 
+
+## [1.9.0]
+ - Add a `doNotDisturb` option to prevent output tab from been focused on non-zero exit code.
+
 ## [1.8.0]
  - Supports `onlyRunOnManualSave` option, to limit running commands only for manually save.
  - Fixes the wrong `commandBeforeSaving` usage description.
