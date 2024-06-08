@@ -272,6 +272,11 @@
 								"type": "boolean",
 								"description": "Clear the output channel before running. Default value is `false`.",
 								"default": false
+							},
+							"doNotDisturb": {
+								"type": "boolean",
+								"description": "Prevents the Output tab from being focused on non-zero exit codes. Only works when `runIn=backend`.",
+								"default": false
 							}
 						}
 					}

@@ -21,6 +21,7 @@ export interface RawCommand {
 	finishStatusMessage: string
 	async?: boolean
 	clearOutput?: boolean
+	doNotDisturb?: boolean
 }
 
 /** Processed command, which can be run directly. */
@@ -37,6 +38,7 @@ export interface ProcessedCommand {
 	finishStatusMessage: string
 	async?: boolean
 	clearOutput?: boolean
+	doNotDisturb?: boolean
 }
 
 /** The commands in list will be picked by current editing file path. */
@@ -49,6 +51,7 @@ export interface BackendCommand {
 	async: boolean
 	statusMessageTimeout?: number
 	clearOutput?: boolean
+	doNotDisturb?: boolean
 }
 
 export interface TerminalCommand {
@@ -98,7 +101,7 @@ export class CommandProcessor {
 	prepareCommandsForFileAfterSaving(uri: vscode.Uri) {
 		return this.prepareCommandsForFile(uri, false)
 	}
-	
+
 	/** Prepare raw commands to link current working file. */
 	private async prepareCommandsForFile(uri: vscode.Uri, forCommandsAfterSaving: boolean) {
 		let preparedCommands = []
@@ -122,6 +125,7 @@ export class CommandProcessor {
 					finishStatusMessage: await this.formatVariables(command.finishStatusMessage, pathSeparator, uri),
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
+					doNotDisturb: command.doNotDisturb ?? false,
 				} as BackendCommand)
 			}
 			else if (command.runIn === 'terminal') {
@@ -187,7 +191,7 @@ export class CommandProcessor {
 			globMatch = await this.formatVariables(globMatch, undefined, uri)
 		}
 
-		let gm = new minimatch.Minimatch(globMatch) 
+		let gm = new minimatch.Minimatch(globMatch)
 
 		// If match whole path.
 		if (gm.match(uri.fsPath)) {
