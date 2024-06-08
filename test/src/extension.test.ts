@@ -28,6 +28,7 @@ suite("Extension Tests", () => {
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
 				'clearOutput': false,
+				'doNotDisturb': false,
 			}])
 		})
 
@@ -67,6 +68,7 @@ suite("Extension Tests", () => {
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
 				'clearOutput': false,
+				'doNotDisturb': false,
 			}])
 		})
 	})
@@ -93,6 +95,7 @@ suite("Extension Tests", () => {
 				'finishStatusMessage': 'fileName.scss compiled',
 				'async': true,
 				'clearOutput': false,
+				'doNotDisturb': false,
 			}])
 		})
 	})
@@ -159,6 +162,7 @@ suite("Extension Tests", () => {
 				'runningStatusMessage': '',
 				'async': true,
 				'clearOutput': false,
+				'doNotDisturb': false,
 			}])
 		})
 	})
