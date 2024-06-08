@@ -3,7 +3,7 @@
 
 
 ## [1.9.0]
- - Add a `doNotDisturb` option to prevent output tab from been focused on non-zero exit code.
+ - Add a `doNotDisturb` option to prevent output tab from been focused on non-zero exit code. Thanks to pull request from `Tristano8@github` .
 
 ## [1.8.0]
  - Supports `onlyRunOnManualSave` option, to limit running commands only for manually save.
@@ -12,14 +12,14 @@
 
 ## [1.7.1]
 
- - Merges CyprusSocialite@github's pull request, supports `clearOutput` option, and adjust plugin activation time.
+ - Merges `CyprusSocialite@github`'s pull request, supports `clearOutput` option, and adjust plugin activation time.
  - Supports `commandBeforeSaving`, to specifies commands before saving document.
  - `globMatch` can be specified as a relative path, which will be used to match file path relative to current workspace directory.
 
 
 ## [1.7.0]
 
- - Merges jackwhelpton@github's pull request, supports more variables.
+ - Merges `jackwhelpton@github`'s pull request, supports more variables.
  - Adjusts test settings.
 
 
