@@ -1,6 +1,8 @@
 # ChangeLog
 
 
+## [1.9.1]
+ - Fix #44, which will cause `defaultRunIn` option not working.
 
 ## [1.9.0]
  - Add a `doNotDisturb` option to prevent output tab from been focused on non-zero exit code. Thanks to pull request from `Tristano8@github` .

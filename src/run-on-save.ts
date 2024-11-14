@@ -1,17 +1,9 @@
 import {exec, ChildProcess} from 'child_process'
 import * as vscode from 'vscode'
-import {RawCommand, CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand} from './command-processor'
+import {CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand} from './command-processor'
 import {FleetingDoubleKeysCache, timeout} from './util'
 import {FileIgnoreChecker} from './file-ignore-checker'
 
-
-export interface Configuration {
-	statusMessageTimeout: number
-	ignoreFilesBy: string[]
-	shell: String
-	commands: RawCommand
-	defaultRunIn: 'backend' | 'terminal' | 'vscode'
-}
 
 export class RunOnSaveExtension {
 
@@ -34,7 +26,7 @@ export class RunOnSaveExtension {
 	/** Load or reload configuration. */
 	loadConfig() {
 		this.config = vscode.workspace.getConfiguration('runOnSave')
-		this.commandProcessor.setRawCommands(<RawCommand[]>this.config.get('commands') || [])
+		this.commandProcessor.setRawCommands(<RawCommand[]>this.config.get('commands') || [], this.config.get('defaultRunIn')!)
 	}
 
 	private showEnablingChannelMessage () {
@@ -126,7 +118,7 @@ export class RunOnSaveExtension {
 			this.channel.clear()
 		}
 
-		let runIn = command.runIn || this.config.get('defaultRunIn')
+		let runIn = command.runIn || this.config.get('defaultRunIn') || 'backend'
 
 		if (runIn === 'backend') {
 			return this.runBackendCommand(command as BackendCommand)

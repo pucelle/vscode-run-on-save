@@ -5,25 +5,6 @@ import {CommandVariables} from './command-variables'
 import * as path from 'path'
 
 
-type PathSeparator = '/' | '\\'
-
-/** Raw command configured by user. */
-export interface RawCommand {
-	match: string
-	notMatch: string
-	globMatch: string
-	commandBeforeSaving?: string
-	command?: string
-	args?: string[] | object | string
-	forcePathSeparator?: PathSeparator
-	runIn: string
-	runningStatusMessage: string
-	finishStatusMessage: string
-	async?: boolean
-	clearOutput?: boolean
-	doNotDisturb?: boolean
-}
-
 /** Processed command, which can be run directly. */
 export interface ProcessedCommand {
 	match?: RegExp
@@ -76,13 +57,13 @@ export class CommandProcessor {
 
 	private commands: ProcessedCommand[] = []
 
-	setRawCommands(commands: RawCommand[]) {
-		this.commands = this.processCommands(commands)
+	setRawCommands(commands: RawCommand[], defaultRunIn: Configuration['defaultRunIn']) {
+		this.commands = this.processCommands(commands, defaultRunIn)
 	}
 
-	private processCommands(commands: RawCommand[]): ProcessedCommand[] {
+	private processCommands(commands: RawCommand[], defaultRunIn: Configuration['defaultRunIn']): ProcessedCommand[] {
 		return commands.map(command => {
-			command.runIn = command.runIn || 'backend'
+			command.runIn = command.runIn || defaultRunIn || 'backend'
 
 			return Object.assign({}, command, {
 				match: command.match ? new RegExp(command.match, 'i') : undefined,
