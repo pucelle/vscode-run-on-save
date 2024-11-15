@@ -1,5 +1,7 @@
 # ChangeLog
 
+## [1.9.2]
+ - `defaultRunIn` option now it's default value is `backend`, not `vscode` any more. If your commands not run, try specify this option.
 
 ## [1.9.1]
  - Fix #44, which will cause `defaultRunIn` option not working.

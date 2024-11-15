@@ -26,7 +26,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `runOnSave.statusMessageTimeout` | Specify the default timeout milliseconds after which the status bar message will hide, default value is `3000`, means 3 seconds.
 | `runOnSave.ignoreFilesBy`        | Specifies it to ignore files that list in `.gitignore` or `.npmignore`. default value is empty list.
 | `runOnSave.shell`                | Specify in which shell the commands are executed, defaults to the default vscode shell.
-| `runOnSave.defaultRunIn`         | Specify default `commands[].runIn` for all the commands, it equals to `vscode` if not specified.
+| `runOnSave.defaultRunIn`         | Specify default `commands[].runIn` for all the commands, defaults to `backend` if not specified.
 | `runOnSave.onlyRunOnManualSave`  | Whether to only run commands when a file is manually saved, defaults to `false`.
 | `runOnSave.commands`             | Specify the array of commands to execute and related info, its child options as below.
 
@@ -45,12 +45,12 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 | `commands[].runningStatusMessage` | Specify the status bar message when the shell command begin to run, supports variable substitution too. Only works when `runIn=backend`.
 | `commands[].finishStatusMessage`  | Specify the status bar message after the shell command finished executing, also supports variable substitution. Only works when `runIn=backend`.
 | `commands[].statusMessageTimeout` | Specify the timeout milliseconds of current message, after which the status bar message will hide, default value is `3000`, means 3 seconds.
-| `commands[].terminalHideTimeout`  | Sepcify the timeout in milliseconds after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.
+| `commands[].terminalHideTimeout`  | Specify the timeout in milliseconds after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.
 | `commands[].workingDirectoryAsCWD`| Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.
 | `commands[].clearOutput`          | Clear the output channel before running current command. Default value is `false`.
 | `commands[].doNotDisturb`         | By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend`.
 | `commands[].runIn`                | See list below. Default value is specified by `runOnSave.defaultRunIn`, or `vscode`.
- - `backend`: Run command silently and show messages in output channel, you can specify runningStatusMessage and finishStatusMessage to give you a little feekback. Choose this when you don't want to be disturbed.
+ - `backend`: Run command silently and show messages in output channel, you can specify runningStatusMessage and finishStatusMessage to give you a little feedback. Choose this when you don't want to be disturbed.
  - `terminal`: Run command in vscode terminal, which keeps message colors. Choose this when you want to get feedback details.
  - `vscode`: Run vscode's command. Choose this if you want to execute vscode's own command or a command of a particular extension.
 
@@ -110,7 +110,7 @@ Note that if `forcePathSeparator` specified, separators in these variables will 
 | `${selectedText}`            | selected text in vscode editor.
 | `${execPath}`                | absolute pathname of the vscode process. 
 | `${defaultBuildTaskName}`    | default build task name of current project.
-| `${pathSeparator}`           | path seperator based on system.
+| `${pathSeparator}`           | path separator based on system.
 | `${env:envName}`             | reference environment variable `envName`.
 | `${config:vsConfigName}`     | reference vscode configuration name `vsConfigName`.
 | `${command:vsCommandName}`   | execute vscode command `vsCommandName`, and reference returned result.

@@ -63,9 +63,8 @@ export class CommandProcessor {
 
 	private processCommands(commands: RawCommand[], defaultRunIn: Configuration['defaultRunIn']): ProcessedCommand[] {
 		return commands.map(command => {
-			command.runIn = command.runIn || defaultRunIn || 'backend'
-
 			return Object.assign({}, command, {
+				runIn: command.runIn || defaultRunIn || 'backend',
 				match: command.match ? new RegExp(command.match, 'i') : undefined,
 				notMatch: command.notMatch ? new RegExp(command.notMatch, 'i') : undefined,
 				globMatch: command.globMatch ? command.globMatch : undefined

@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.9.1",
+	"version": "1.9.2",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -48,7 +48,7 @@
 			"properties": {
 				"runOnSave.statusMessageTimeout": {
 					"type": "number",
-					"description": "Specify the timeout in millisecond after which the status message will be hidden. Works when `runIn=backend`, can be overwriten by the `statusMessageTimeout` in each command.",
+					"description": "Specify the timeout in millisecond after which the status message will be hidden. Works when `runIn=backend`, can be overwritten by the `statusMessageTimeout` in each command.",
 					"default": 3000
 				},
 				"runOnSave.ignoreFilesBy": {
@@ -70,15 +70,15 @@
 				},
 				"runOnSave.defaultRunIn": {
 					"type": "string",
-					"description": "Run command in which environment by default. Default value is `vscode`.",
+					"description": "Run command in which environment by default. Default value is `backend`.",
 					"enum": [
 						"backend",
 						"terminal",
 						"vscode"
 					],
-					"default": "vscode",
+					"default": "backend",
 					"enumDescriptions": [
-						"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feekback. Choose this when you don't want to be disturbed.",
+						"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feedback. Choose this when you don't want to be disturbed.",
 						"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details.",
 						"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
 					]
@@ -139,7 +139,7 @@
 								],
 								"default": "backend",
 								"enumDescriptions": [
-									"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feekback. Choose this when you don't want to be disturbed.",
+									"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feedback. Choose this when you don't want to be disturbed.",
 									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details.",
 									"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
 								]
@@ -161,12 +161,12 @@
 							},
 							"statusMessageTimeout": {
 								"type": "number",
-								"description": "Sepcify the timeout in millisecond after which the status message will hide. Only works when `runIn=backend`.",
+								"description": "Specify the timeout in millisecond after which the status message will hide. Only works when `runIn=backend`.",
 								"default": 3000
 							},
 							"terminalHideTimeout": {
 								"type": "number",
-								"description": "Sepcify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
+								"description": "Specify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
 								"default": -1
 							},
 							"workingDirectoryAsCWD": {
@@ -233,7 +233,7 @@
 								],
 								"default": "backend",
 								"enumDescriptions": [
-									"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feekback. Choose this when you don't want to be disturbed.",
+									"Run command silently and output messages to output channel, you can specify `runningStatusMessage` and `finishStatusMessage` to give you feedback. Choose this when you don't want to be disturbed.",
 									"Run command in vscode terminal, which keeps message colors. Choose this when you want to get command feedback details.",
 									"Run vscode's command. Choose this if you want to execute vscode's own command or a command from a installed vscode extension."
 								]
@@ -255,12 +255,12 @@
 							},
 							"statusMessageTimeout": {
 								"type": "number",
-								"description": "Sepcify the timeout in millisecond after which the status message will hide. Only works when `runIn=backend`.",
+								"description": "Specify the timeout in millisecond after which the status message will hide. Only works when `runIn=backend`.",
 								"default": 3000
 							},
 							"terminalHideTimeout": {
 								"type": "number",
-								"description": "Sepcify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
+								"description": "Specify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
 								"default": -1
 							},
 							"workingDirectoryAsCWD": {
