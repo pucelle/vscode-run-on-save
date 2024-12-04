@@ -139,7 +139,7 @@ export class CommandProcessor {
 			let {languages, match, notMatch, globMatch} = command
 
 			if (!this.doLanguageTest(languages, document)) {
-				continue;
+				continue
 			}
 
 			if (!this.doMatchTest(match, notMatch, document.uri)) {
