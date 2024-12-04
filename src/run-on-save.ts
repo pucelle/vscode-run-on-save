@@ -56,27 +56,27 @@ export class RunOnSaveExtension {
 	}
 
 	/** Returns a promise it was resolved firstly and then will save document. */
-	async onWillSaveDocument(document: vscode.TextDocument | vscode.NotebookDocument, reason: vscode.TextDocumentSaveReason) {
+	async onWillSaveDocument(document: VSCodeDocument, reason: vscode.TextDocumentSaveReason) {
 		this.documentSaveReasonCache.set(document.uri.fsPath, document.version, reason)
 
 		if (!this.getEnabled() || await this.shouldIgnore(document.uri, reason)) {
 			return
 		}
 
-		let commandsToRun = await this.commandProcessor.prepareCommandsForFileBeforeSaving(document.uri)
+		let commandsToRun = await this.commandProcessor.prepareCommandsForFileBeforeSaving(document)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}
 	}
 
-	async onDocumentSaved(document: vscode.TextDocument | vscode.NotebookDocument) {
+	async onDocumentSaved(document: VSCodeDocument) {
 		let reason = this.documentSaveReasonCache.get(document.uri.fsPath, document.version)
 
 		if (!this.getEnabled() || await this.shouldIgnore(document.uri, reason)) {
 			return
 		}
 
-		let commandsToRun = await this.commandProcessor.prepareCommandsForFileAfterSaving(document.uri)
+		let commandsToRun = await this.commandProcessor.prepareCommandsForFileAfterSaving(document)
 		if (commandsToRun.length > 0) {
 			await this.runCommands(commandsToRun)
 		}

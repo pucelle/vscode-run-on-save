@@ -7,6 +7,7 @@ import * as path from 'path'
 
 /** Processed command, which can be run directly. */
 export interface ProcessedCommand {
+	languages?: string[]
 	match?: RegExp
 	notMatch?: RegExp
 	globMatch?: string
@@ -65,6 +66,7 @@ export class CommandProcessor {
 		return commands.map(command => {
 			return Object.assign({}, command, {
 				runIn: command.runIn || defaultRunIn || 'backend',
+				languages: command.languages,
 				match: command.match ? new RegExp(command.match, 'i') : undefined,
 				notMatch: command.notMatch ? new RegExp(command.notMatch, 'i') : undefined,
 				globMatch: command.globMatch ? command.globMatch : undefined
@@ -73,20 +75,20 @@ export class CommandProcessor {
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileBeforeSaving(uri: vscode.Uri) {
-		return this.prepareCommandsForFile(uri, true)
+	prepareCommandsForFileBeforeSaving(document: VSCodeDocument) {
+		return this.prepareCommandsForFile(document, true)
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileAfterSaving(uri: vscode.Uri) {
-		return this.prepareCommandsForFile(uri, false)
+	prepareCommandsForFileAfterSaving(document: VSCodeDocument) {
+		return this.prepareCommandsForFile(document, false)
 	}
 
 	/** Prepare raw commands to link current working file. */
-	private async prepareCommandsForFile(uri: vscode.Uri, forCommandsAfterSaving: boolean) {
+	private async prepareCommandsForFile(document: VSCodeDocument, forCommandsAfterSaving: boolean) {
 		let preparedCommands = []
 
-		for (let command of await this.filterCommandsFromFilePath(uri)) {
+		for (let command of await this.filterCommandsFromFilePath(document)) {
 			let commandString = forCommandsAfterSaving
 				? command.commandBeforeSaving
 				: command.command
@@ -100,9 +102,9 @@ export class CommandProcessor {
 			if (command.runIn === 'backend') {
 				preparedCommands.push({
 					runIn: 'backend',
-					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, uri), command.args),
-					runningStatusMessage: await this.formatVariables(command.runningStatusMessage, pathSeparator, uri),
-					finishStatusMessage: await this.formatVariables(command.finishStatusMessage, pathSeparator, uri),
+					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, document.uri), command.args),
+					runningStatusMessage: await this.formatVariables(command.runningStatusMessage, pathSeparator, document.uri),
+					finishStatusMessage: await this.formatVariables(command.finishStatusMessage, pathSeparator, document.uri),
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
 					doNotDisturb: command.doNotDisturb ?? false,
@@ -111,7 +113,7 @@ export class CommandProcessor {
 			else if (command.runIn === 'terminal') {
 				preparedCommands.push({
 					runIn: 'terminal',
-					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, uri), command.args),
+					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, document.uri), command.args),
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
 				} as TerminalCommand)
@@ -119,7 +121,7 @@ export class CommandProcessor {
 			else {
 				preparedCommands.push({
 					runIn: 'vscode',
-					command: await this.formatCommandString(commandString, pathSeparator, uri),
+					command: await this.formatCommandString(commandString, pathSeparator, document.uri),
 					args: command.args,
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
@@ -130,17 +132,21 @@ export class CommandProcessor {
 		return preparedCommands
 	}
 
-	private async filterCommandsFromFilePath(uri: vscode.Uri): Promise<ProcessedCommand[]> {
+	private async filterCommandsFromFilePath(document: VSCodeDocument): Promise<ProcessedCommand[]> {
 		let filteredCommands = []
 
 		for (let command of this.commands) {
-			let {match, notMatch, globMatch} = command
+			let {languages, match, notMatch, globMatch} = command
 
-			if (!this.doMatchTest(match, notMatch, uri)) {
+			if (!this.doLanguageTest(languages, document)) {
+				continue;
+			}
+
+			if (!this.doMatchTest(match, notMatch, document.uri)) {
 				continue
 			}
 
-			if (!await this.doGlobMatchTest(globMatch, uri)) {
+			if (!(await this.doGlobMatchTest(globMatch, document.uri))) {
 				continue
 			}
 
@@ -148,6 +154,21 @@ export class CommandProcessor {
 		}
 
 		return filteredCommands
+	}
+
+	private doLanguageTest(languages: string[] | undefined, document: VSCodeDocument): boolean {
+		// No languages specified. Apply to all by default.
+		if (!languages?.length) {
+			return true
+		}
+
+		// Does not apply if user has specified languages and the current document is a `NotebookDocument`.
+		if (!('languageId' in document)) {
+			return false
+		}
+
+		// Match `languageId` case-insensitively.
+		return languages.some((languageId) => languageId.toLowerCase() === document.languageId.toLowerCase())
 	}
 
 	private doMatchTest(match: RegExp | undefined, notMatch: RegExp | undefined, uri: vscode.Uri): boolean {
