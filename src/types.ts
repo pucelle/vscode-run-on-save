@@ -8,6 +8,7 @@ interface Configuration {
 
 /** Raw command configured by user. */
 interface RawCommand {
+	languages: string[]
 	match: string
 	notMatch: string
 	globMatch: string
@@ -24,3 +25,5 @@ interface RawCommand {
 }
 
 type PathSeparator = '/' | '\\'
+
+type VSCodeDocument = import('vscode').TextDocument | import('vscode').NotebookDocument
