@@ -1,15 +1,16 @@
 import * as assert from 'assert'
 import * as path from 'path'
-import {Uri} from 'vscode'
-import {RawCommand, CommandProcessor} from '../../out/command-processor'
+import * as vscode from 'vscode'
+import {CommandProcessor} from '../../out/command-processor'
 import {FileIgnoreChecker} from '../../out/file-ignore-checker'
 import {FleetingDoubleKeysCache} from '../../out/util'
+import {RawCommand, VSCodeDocumentPartial} from '../../out/types'
 
 
 suite("Extension Tests", () => {
 	suite('test backend command', function () {
 		let manager = new CommandProcessor()
-		manager.setRawCommands([<RawCommand>{
+		manager.setRawCommands([{
 			'match': '.*\\.scss$',
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'backend',
@@ -17,10 +18,14 @@ suite("Extension Tests", () => {
 			'runningStatusMessage': 'Compiling ${fileBasename}',
 			'finishStatusMessage': '${fileBasename} compiled',
 			'forcePathSeparator': '/',
-		}])
+		}], 'backend')
 
 		test('will compile scss file in backend', async function () {
-			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName.scss'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/folderName/fileName.scss')
+			}
+			
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
 				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
@@ -33,12 +38,20 @@ suite("Extension Tests", () => {
 		})
 
 		test('will exclude scss file that file name starts with "_"', async function () {
-			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/_fileName.scss'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/folderName/_fileName.scss')
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
 			assert.deepStrictEqual(commands, [])
 		})
 		
 		test('will escape white spaces', async function () {
-			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName 1.scss'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/folderName/fileName 1.scss')
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
 			assert.deepStrictEqual(
 				commands[0].command,
 				'node-sass "c:/folderName/fileName 1.scss" "c:/folderName/fileName 1.css"'
@@ -57,10 +70,14 @@ suite("Extension Tests", () => {
 			'finishStatusMessage': '${fileBasename} compiled',
 			'async': true,
 			'forcePathSeparator': '/',
-		}])
+		}], 'backend')
 
 		test('will compile scss file in backend', async function () {
-			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName.scss'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/folderName/fileName.scss')
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
 				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
@@ -84,10 +101,14 @@ suite("Extension Tests", () => {
 			'finishStatusMessage': '${fileBasename} compiled',
 			'async': true,
 			'forcePathSeparator': '/',
-		}])
+		}], 'backend')
 
 		test('will compile scss file in backend', async function () {
-			let commands = await manager.prepareCommandsForFileBeforeSaving(Uri.file('C:/folderName/fileName.scss'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/folderName/fileName.scss')
+			}
+
+			let commands = await manager.prepareCommandsForFileBeforeSaving(doc)
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
 				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
@@ -110,10 +131,14 @@ suite("Extension Tests", () => {
 			'command': 'node-sass ${file} ${fileDirname}\\${fileBasenameNoExtension}.css',
 			'runningStatusMessage': 'Compiling ${fileBasename}',
 			'finishStatusMessage': '${fileBasename} compiled',
-		}])
+		}], 'backend')
 
 		test('will escape paths starts with "\\\\"', async function () {
-			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('\\\\folderName\\fileName 1.scss'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('\\\\folderName\\fileName 1.scss')
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
 			assert.deepStrictEqual(
 				commands[0].command,
 				'node-sass "\\\\folderName\\fileName 1.scss" "\\\\folderName\\fileName 1.css"'
@@ -130,10 +155,14 @@ suite("Extension Tests", () => {
 			'runIn': 'terminal',
 			'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
 			'forcePathSeparator': '/',
-		}])
+		}], 'backend')
 
 		test('will compile scss file in terminal', async function () {
-			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/folderName/fileName.scss'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/folderName/fileName.scss')
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'terminal',
 				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
@@ -151,10 +180,14 @@ suite("Extension Tests", () => {
 			"runIn": "backend",
 			"command": "draw.io --crop --export -f pdf \"${file}\"",
 			'forcePathSeparator': '/',
-		}])
+		}], 'backend')
 
 		test('will compile it right', async function () {
-			let commands = await manager.prepareCommandsForFileAfterSaving(Uri.file('C:/test.drawio'))
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/test.drawio')
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'backend',
 				'command': 'draw.io --crop --export -f pdf "c:/test.drawio"',
@@ -163,6 +196,34 @@ suite("Extension Tests", () => {
 				'async': true,
 				'clearOutput': false,
 				'doNotDisturb': false,
+			}])
+		})
+	})
+
+
+	suite('test #47, supports `commands[].languages`', function () {
+		let manager = new CommandProcessor()
+		manager.setRawCommands([<RawCommand>{
+			"languages": ["typescript"],
+			"runIn": "backend",
+			"command": "anyCommandsToRun",
+		}], 'backend')
+
+		test('will compile it right', async function () {
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('C:/anyFileName'),
+				languageId: 'typescript',
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
+			assert.deepStrictEqual(commands, [{
+				'runIn': 'backend',
+				'command': 'anyCommandsToRun',
+				'async': true,
+				'clearOutput': false,
+				'doNotDisturb': false,
+				"finishStatusMessage": "",
+				"runningStatusMessage": ""
 			}])
 		})
 	})

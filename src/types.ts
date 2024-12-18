@@ -1,4 +1,7 @@
-interface Configuration {
+import * as vscode from 'vscode'
+
+
+export interface Configuration {
 	statusMessageTimeout: number
 	ignoreFilesBy: string[]
 	shell: String
@@ -7,23 +10,25 @@ interface Configuration {
 }
 
 /** Raw command configured by user. */
-interface RawCommand {
-	languages: string[]
-	match: string
-	notMatch: string
-	globMatch: string
+export interface RawCommand {
+	languages?: string[]
+	match?: string
+	notMatch?: string
+	globMatch?: string
 	commandBeforeSaving?: string
 	command?: string
 	args?: string[] | object | string
 	forcePathSeparator?: PathSeparator
-	runIn: string
-	runningStatusMessage: string
-	finishStatusMessage: string
+	runIn?: string
+	runningStatusMessage?: string
+	finishStatusMessage?: string
 	async?: boolean
 	clearOutput?: boolean
 	doNotDisturb?: boolean
 }
 
-type PathSeparator = '/' | '\\'
+export type PathSeparator = '/' | '\\'
 
-type VSCodeDocument = import('vscode').TextDocument | import('vscode').NotebookDocument
+export type VSCodeDocument = vscode.TextDocument | vscode.NotebookDocument
+
+export type VSCodeDocumentPartial = Pick<vscode.TextDocument, 'uri'> & Partial<Pick<vscode.TextDocument, 'languageId'>>

@@ -1,8 +1,9 @@
 import {exec, ChildProcess} from 'child_process'
 import * as vscode from 'vscode'
-import {CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand} from './command-processor'
+import {CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand, ProcessedCommand} from './command-processor'
 import {FleetingDoubleKeysCache, timeout} from './util'
 import {FileIgnoreChecker} from './file-ignore-checker'
+import {RawCommand, VSCodeDocument} from './types'
 
 
 export class RunOnSaveExtension {
@@ -13,7 +14,8 @@ export class RunOnSaveExtension {
 	private commandProcessor: CommandProcessor = new CommandProcessor()
 
 	/** A record of document uris and document versions to save reasons. */
-	private documentSaveReasonCache: FleetingDoubleKeysCache<string, number, vscode.TextDocumentSaveReason> = new FleetingDoubleKeysCache()
+	private documentSaveReasonCache: FleetingDoubleKeysCache<string, number, vscode.TextDocumentSaveReason>
+		= new FleetingDoubleKeysCache()
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context
@@ -95,7 +97,7 @@ export class RunOnSaveExtension {
 		return checker.shouldIgnore(uri.fsPath)
 	}
 
-	private async runCommands(commands: (BackendCommand | TerminalCommand | VSCodeCommand)[]) {
+	private async runCommands(commands: ProcessedCommand[]) {
 		let promises: Promise<void>[] = []
 		let syncCommands = commands.filter(c => !c.async)
 		let asyncCommands = commands.filter(c => c.async)
@@ -113,7 +115,7 @@ export class RunOnSaveExtension {
 		await Promise.all(promises)
 	}
 
-	private runACommand(command: BackendCommand | TerminalCommand | VSCodeCommand): Promise<void> {
+	private runACommand(command: ProcessedCommand): Promise<void> {
 		if (command.clearOutput) {
 			this.channel.clear()
 		}

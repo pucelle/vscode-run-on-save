@@ -1,5 +1,8 @@
 # ChangeLog
 
+## [1.10.0]
+ - Merges `strawhat-dev@github`'s pull request, supports `commands[].languages` to do language id matching.
+
 ## [1.9.2]
  - `defaultRunIn` option now it's default value is `backend`, not `vscode`. If your commands can't run, try specify this option.
 
@@ -8,6 +11,7 @@
 
 ## [1.9.0]
  - Add a `doNotDisturb` option to prevent output tab from been focused on non-zero exit code. Thanks to pull request from `Tristano8@github` .
+
 
 ## [1.8.0]
  - Supports `onlyRunOnManualSave` option, to limit running commands only for manually save.

@@ -3,55 +3,47 @@ import {formatCommandPieces, encodeCommandLineToBeQuotedIf} from './util'
 import * as minimatch from 'minimatch'
 import {CommandVariables} from './command-variables'
 import * as path from 'path'
+import {Configuration, PathSeparator, RawCommand, VSCodeDocumentPartial} from './types'
 
 
-/** Processed command, which can be run directly. */
-export interface ProcessedCommand {
+/** Processed command base, will be extended. */
+export interface ProcessedCommandBase {
 	languages?: string[]
 	match?: RegExp
 	notMatch?: RegExp
 	globMatch?: string
 	commandBeforeSaving?: string
-	command?: string
+	command: string
 	args?: string[] | object | string
 	forcePathSeparator?: PathSeparator
 	runIn: string
-	runningStatusMessage: string
-	finishStatusMessage: string
 	async?: boolean
 	clearOutput?: boolean
 	doNotDisturb?: boolean
 }
 
-/** The commands in list will be picked by current editing file path. */
-export interface BackendCommand {
+export interface BackendCommand extends ProcessedCommandBase {
 	runIn: 'backend'
-	command: string
 	runningStatusMessage: string
 	finishStatusMessage: string
 	workingDirectoryAsCWD: boolean
-	async: boolean
 	statusMessageTimeout?: number
-	clearOutput?: boolean
 	doNotDisturb?: boolean
 }
 
-export interface TerminalCommand {
+export interface TerminalCommand extends ProcessedCommandBase {
 	runIn: 'terminal'
-	command: string
-	async: boolean
 	statusMessageTimeout?: number
 	terminalHideTimeout?: number
-	clearOutput?: boolean
 }
 
-export interface VSCodeCommand {
+export interface VSCodeCommand extends ProcessedCommandBase {
 	runIn: 'vscode'
-	command: string
 	args?: string[] | object | string
-	async: boolean
-	clearOutput?: boolean
 }
+
+export type ProcessedCommand = BackendCommand | TerminalCommand | VSCodeCommand
+
 
 
 export class CommandProcessor {
@@ -70,25 +62,25 @@ export class CommandProcessor {
 				match: command.match ? new RegExp(command.match, 'i') : undefined,
 				notMatch: command.notMatch ? new RegExp(command.notMatch, 'i') : undefined,
 				globMatch: command.globMatch ? command.globMatch : undefined
-			})
+			}) as ProcessedCommand
 		})
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileBeforeSaving(document: VSCodeDocument) {
-		return this.prepareCommandsForFile(document, true)
+	prepareCommandsForFileBeforeSaving(document: VSCodeDocumentPartial): Promise<ProcessedCommand[]> {
+		return this.prepareCommandsForDocument(document, true)
 	}
 
 	/** Prepare raw commands to link current working file. */
-	prepareCommandsForFileAfterSaving(document: VSCodeDocument) {
-		return this.prepareCommandsForFile(document, false)
+	prepareCommandsForFileAfterSaving(document: VSCodeDocumentPartial): Promise<ProcessedCommand[]> {
+		return this.prepareCommandsForDocument(document, false)
 	}
 
 	/** Prepare raw commands to link current working file. */
-	private async prepareCommandsForFile(document: VSCodeDocument, forCommandsAfterSaving: boolean) {
-		let preparedCommands = []
+	private async prepareCommandsForDocument(document: VSCodeDocumentPartial, forCommandsAfterSaving: boolean): Promise<ProcessedCommand[]> {
+		let preparedCommands: ProcessedCommand[] = []
 
-		for (let command of await this.filterCommandsFromFilePath(document)) {
+		for (let command of await this.filterCommandsByDocument(document)) {
 			let commandString = forCommandsAfterSaving
 				? command.commandBeforeSaving
 				: command.command
@@ -132,7 +124,7 @@ export class CommandProcessor {
 		return preparedCommands
 	}
 
-	private async filterCommandsFromFilePath(document: VSCodeDocument): Promise<ProcessedCommand[]> {
+	private async filterCommandsByDocument(document: VSCodeDocumentPartial): Promise<ProcessedCommand[]> {
 		let filteredCommands = []
 
 		for (let command of this.commands) {
@@ -156,8 +148,9 @@ export class CommandProcessor {
 		return filteredCommands
 	}
 
-	private doLanguageTest(languages: string[] | undefined, document: VSCodeDocument): boolean {
-		// No languages specified. Apply to all by default.
+	private doLanguageTest(languages: string[] | undefined, document: VSCodeDocumentPartial): boolean {
+
+		// No languages specified, not filter out document.
 		if (!languages?.length) {
 			return true
 		}
@@ -168,7 +161,7 @@ export class CommandProcessor {
 		}
 
 		// Match `languageId` case-insensitively.
-		return languages.some((languageId) => languageId.toLowerCase() === document.languageId.toLowerCase())
+		return languages.some((languageId) => languageId.toLowerCase() === document.languageId!.toLowerCase())
 	}
 
 	private doMatchTest(match: RegExp | undefined, notMatch: RegExp | undefined, uri: vscode.Uri): boolean {

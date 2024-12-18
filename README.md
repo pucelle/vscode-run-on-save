@@ -34,6 +34,7 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
 
 | Name                              | Description
 | ---                               | ---
+| `commands[].languages`            | Specify an array of language ids to filter commands, only when language matches command will run.
 | `commands[].match`                | Specify RegExp source string, files which's path match will be included. E.g.: `\\.scss$` can used to match scss files.
 | `commands[].notMatch`             | Specify RegExp source string, files which's path match will be excluded even they were included by `match` or `globMatch`. E.g.: `[\\\\\\/]_[\\w-]+\\.scss$` can be used to exclude scss library files.
 | `commands[].globMatch`            | Specify a glob expression, to match the whole file path or the relative path relative to current workspace directory. the matched files will be included. E.g.: `**/*.scss` will match all scss files, `*.scss` will match all scss files located in current workspace directory.
@@ -77,7 +78,14 @@ If you need to run VS Code's commands change `runIn` option to `vscode`
             "runIn": "terminal"
         },
         {
+            // Match any python files by path.
             "match": ".*\\.py$",
+            "command": "python.runLinting",
+            "runIn": "vscode"
+        },
+        {
+            // Match any python files by language id.
+            "languages": ["python"],
             "command": "python.runLinting",
             "runIn": "vscode"
         }
