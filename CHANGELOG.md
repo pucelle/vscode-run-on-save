@@ -1,5 +1,8 @@
 # ChangeLog
 
+## [1.10.1]
+ - Fix #49, when `workingDirectoryAsCWD` is `true`, and multiple root folders existing, `cwd` can be rightly choose the root folder that recently saved file belongs to.
+
 ## [1.10.0]
  - Merges `strawhat-dev@github`'s pull request, supports `commands[].languages` to do language id matching.
 

@@ -67,7 +67,7 @@ export class RunOnSaveExtension {
 
 		let commandsToRun = await this.commandProcessor.prepareCommandsForFileBeforeSaving(document)
 		if (commandsToRun.length > 0) {
-			await this.runCommands(commandsToRun)
+			await this.runCommands(commandsToRun, document.uri)
 		}
 	}
 
@@ -80,7 +80,7 @@ export class RunOnSaveExtension {
 
 		let commandsToRun = await this.commandProcessor.prepareCommandsForFileAfterSaving(document)
 		if (commandsToRun.length > 0) {
-			await this.runCommands(commandsToRun)
+			await this.runCommands(commandsToRun, document.uri)
 		}
 	}
 
@@ -97,25 +97,25 @@ export class RunOnSaveExtension {
 		return checker.shouldIgnore(uri.fsPath)
 	}
 
-	private async runCommands(commands: ProcessedCommand[]) {
+	private async runCommands(commands: ProcessedCommand[], uri: vscode.Uri) {
 		let promises: Promise<void>[] = []
 		let syncCommands = commands.filter(c => !c.async)
 		let asyncCommands = commands.filter(c => c.async)
 
 		// Run commands in a parallel.
 		for (let command of asyncCommands) {
-			promises.push(this.runACommand(command))
+			promises.push(this.runACommand(command, uri))
 		}
 
 		// Run commands in series.
 		for (let command of syncCommands) {
-			await this.runACommand(command)
+			await this.runACommand(command, uri)
 		}
 
 		await Promise.all(promises)
 	}
 
-	private runACommand(command: ProcessedCommand): Promise<void> {
+	private runACommand(command: ProcessedCommand, uri: vscode.Uri): Promise<void> {
 		if (command.clearOutput) {
 			this.channel.clear()
 		}
@@ -123,7 +123,7 @@ export class RunOnSaveExtension {
 		let runIn = command.runIn || this.config.get('defaultRunIn') || 'backend'
 
 		if (runIn === 'backend') {
-			return this.runBackendCommand(command as BackendCommand)
+			return this.runBackendCommand(command as BackendCommand, uri)
 		}
 		else if (runIn === 'terminal') {
 			return this.runTerminalCommand(command as TerminalCommand)
@@ -133,7 +133,7 @@ export class RunOnSaveExtension {
 		}
 	}
 
-	private runBackendCommand(command: BackendCommand) {
+	private runBackendCommand(command: BackendCommand, uri: vscode.Uri) {
 		return new Promise((resolve) => {
 			this.showChannelMessage(`Running "${command.command}"`)
 
@@ -141,7 +141,7 @@ export class RunOnSaveExtension {
 				this.showStatusMessage(command.runningStatusMessage, command.statusMessageTimeout)
 			}
 
-			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true)
+			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true, uri)
 			child.stdout!.on('data', data => this.channel.append(data.toString()))
 			child.stderr!.on('data', data => this.channel.append(data.toString()))
 
@@ -159,8 +159,12 @@ export class RunOnSaveExtension {
 		}) as Promise<void>
 	}
 
-	private execShellCommand(command: string, workingDirectoryAsCWD: boolean): ChildProcess {
-		let cwd = workingDirectoryAsCWD ? vscode.workspace.workspaceFolders?.[0].uri.fsPath : undefined
+	private execShellCommand(command: string, workingDirectoryAsCWD: boolean, uri: vscode.Uri): ChildProcess {
+		let cwd: string | undefined
+		if (workingDirectoryAsCWD) {
+			cwd = vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath
+		}
+		
 		let shell = this.getShellPath()
 
 		return shell ? exec(command, { shell, cwd }) : exec(command, { cwd })
