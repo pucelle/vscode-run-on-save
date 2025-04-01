@@ -161,8 +161,10 @@ export class RunOnSaveExtension {
 
 	private execShellCommand(command: string, workingDirectoryAsCWD: boolean, uri: vscode.Uri): ChildProcess {
 		let cwd: string | undefined
+		
 		if (workingDirectoryAsCWD) {
 			cwd = vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath
+				?? vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
 		}
 		
 		let shell = this.getShellPath()
