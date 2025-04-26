@@ -178,8 +178,9 @@ export class RunOnSaveExtension {
 
 	private async runTerminalCommand(command: TerminalCommand) {
 		let terminal = this.createTerminal()
-
-		terminal.show()
+		if (!command.doNotDisturb) {
+			terminal.show()
+		}
 		terminal.sendText(command.command)
 
 		await timeout(100)

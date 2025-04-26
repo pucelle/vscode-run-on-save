@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import {formatCommandPieces, encodeCommandLineToBeQuotedIf} from './util'
-import * as minimatch from 'minimatch'
+import { MinimatchOptions, Minimatch } from 'minimatch'
 import {CommandVariables} from './command-variables'
 import * as path from 'path'
 import {Configuration, PathSeparator, RawCommand, VSCodeDocumentPartial} from './types'
@@ -12,6 +12,7 @@ export interface ProcessedCommandBase {
 	match?: RegExp
 	notMatch?: RegExp
 	globMatch?: string
+	globMatchOpts? : MinimatchOptions
 	commandBeforeSaving?: string
 	command: string
 	args?: string[] | object | string
@@ -35,6 +36,8 @@ export interface TerminalCommand extends ProcessedCommandBase {
 	runIn: 'terminal'
 	statusMessageTimeout?: number
 	terminalHideTimeout?: number
+	clearOutput?: boolean
+	doNotDisturb?: boolean
 }
 
 export interface VSCodeCommand extends ProcessedCommandBase {
@@ -108,6 +111,7 @@ export class CommandProcessor {
 					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, document.uri), command.args),
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
+					doNotDisturb: command.doNotDisturb ?? false,
 				} as TerminalCommand)
 			}
 			else {
@@ -138,7 +142,7 @@ export class CommandProcessor {
 				continue
 			}
 
-			if (!(await this.doGlobMatchTest(globMatch, document.uri))) {
+			if (!await this.doGlobMatchTest(globMatch, document.uri, command.globMatchOpts)) {
 				continue
 			}
 
@@ -176,7 +180,7 @@ export class CommandProcessor {
 		return true
 	}
 
-	private async doGlobMatchTest(globMatch: string | undefined, uri: vscode.Uri): Promise<boolean> {
+	private async doGlobMatchTest(globMatch: string | undefined, uri: vscode.Uri, globMatchOpts?: MinimatchOptions): Promise<boolean> {
 		if (!globMatch) {
 			return true
 		}
@@ -185,7 +189,7 @@ export class CommandProcessor {
 			globMatch = await this.formatVariables(globMatch, undefined, uri)
 		}
 
-		let gm = new minimatch.Minimatch(globMatch)
+		let gm = new Minimatch(globMatch, globMatchOpts)
 
 		// If match whole path.
 		if (gm.match(uri.fsPath)) {
