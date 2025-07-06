@@ -52,7 +52,7 @@ Note, `languages`, `match`, `globMatch` work like filter, if specifies more than
 | `commands[].terminalHideTimeout`  | Specify the timeout in milliseconds after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.
 | `commands[].workingDirectoryAsCWD`| Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.
 | `commands[].clearOutput`          | Clear the output channel before running current command. Default value is `false`.
-| `commands[].doNotDisturb`         | By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend`.
+| `commands[].doNotDisturb`         | By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Works when `runIn=backend` or `terminal`.
 | `commands[].runIn`                | See list below. Default value is specified by `runOnSave.defaultRunIn`, or `vscode`.
  - `backend`: Run command silently and show messages in output channel, you can specify runningStatusMessage and finishStatusMessage to give you a little feedback. Choose this when you don't want to be disturbed.
  - `terminal`: Run command in vscode terminal, which keeps message colors. Choose this when you want to get feedback details.

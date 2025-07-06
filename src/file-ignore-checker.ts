@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
-import {IMinimatch, Minimatch} from 'minimatch'
+import {Minimatch} from 'minimatch'
 
 
 export interface FileIgnoreCheckerOptions {
@@ -67,7 +67,7 @@ export class FileIgnoreChecker {
 		return this.matchIgnoreRules(relPath, ignoreRules)
 	}
 
-	private async parseIgnoreRules(ignoreFilePath: string): Promise<IMinimatch[]> {
+	private async parseIgnoreRules(ignoreFilePath: string): Promise<Minimatch[]> {
 		let text = await fs.readFile(ignoreFilePath, 'utf8')
 
 		let globOptions = {
@@ -99,7 +99,7 @@ export class FileIgnoreChecker {
 		return rules
 	}
 
-	private matchIgnoreRules(relPath: string, ignoreRules: IMinimatch[]): boolean {
+	private matchIgnoreRules(relPath: string, ignoreRules: Minimatch[]): boolean {
 		for (let rule of ignoreRules) {
 			if (rule.match(relPath)) {
 				return true

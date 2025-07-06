@@ -168,6 +168,7 @@ suite("Extension Tests", () => {
 				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
 				'async': true,
 				'clearOutput': false,
+				"doNotDisturb": false,
 			}])
 		})
 	})
@@ -182,7 +183,7 @@ suite("Extension Tests", () => {
 			'forcePathSeparator': '/',
 		}], 'backend')
 
-		test('will compile it right', async function () {
+		test('will compile it rightly', async function () {
 			let doc: VSCodeDocumentPartial = {
 				uri: vscode.Uri.file('C:/test.drawio')
 			}
@@ -209,7 +210,7 @@ suite("Extension Tests", () => {
 			"command": "anyCommandsToRun",
 		}], 'backend')
 
-		test('will compile it right', async function () {
+		test('will compile it rightly', async function () {
 			let doc: VSCodeDocumentPartial = {
 				uri: vscode.Uri.file('C:/anyFileName'),
 				languageId: 'typescript',

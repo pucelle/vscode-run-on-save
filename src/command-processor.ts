@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import {encodeCommandLineToBeQuotedIf} from './util'
-import {IOptions, Minimatch} from 'minimatch'
+import {MinimatchOptions, Minimatch} from 'minimatch'
 import {CommandVariables} from './command-variables'
 import * as path from 'path'
 import {Configuration, PathSeparator, RawCommand, VSCodeDocumentPartial} from './types'
@@ -12,7 +12,7 @@ export interface ProcessedCommandBase {
 	match?: RegExp
 	notMatch?: RegExp
 	globMatch?: string
-	globMatchOptions? : IOptions
+	globMatchOptions? : MinimatchOptions
 	commandBeforeSaving?: string
 	command: string
 	args?: string[] | object | string
@@ -182,7 +182,7 @@ export class CommandProcessor {
 		return true
 	}
 
-	private async doGlobMatchTest(globMatch: string | undefined, uri: vscode.Uri, globMatchOptions?: IOptions): Promise<boolean> {
+	private async doGlobMatchTest(globMatch: string | undefined, uri: vscode.Uri, globMatchOptions?: MinimatchOptions): Promise<boolean> {
 		if (!globMatch) {
 			return true
 		}

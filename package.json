@@ -625,6 +625,6 @@
 	},
 	"dependencies": {
 		"fs-extra": "^11.1.1",
-		"minimatch": "^10.0.1"
+		"minimatch": "^10.0.3"
 	}
 }
