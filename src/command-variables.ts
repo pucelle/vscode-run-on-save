@@ -1,7 +1,8 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
-import {formatPathSeparator, replaceAsync} from './util'
+import {formatCommandPieces, formatPathSeparator, replaceAsync} from './util'
 import {homedir} from 'os'
+import {PathSeparator} from './types'
 
 
 type VariableProvider = (uri: vscode.Uri) => string | Promise<string>
@@ -60,7 +61,10 @@ export namespace CommandVariables {
 
 	/** Format variables of a string in kind of command / command piece / message. */
 	export async function format(string: string, uri: vscode.Uri, pathSeparator: string | undefined) {
-
+		if (!string) {
+			return ''
+		}
+		
 		// Compatible with old versioned syntax `${env.xxx}`.
 		string = string.replace(/\$\{env\.(\w+)\}/g, '${env:$1}')
 
@@ -85,5 +89,18 @@ export namespace CommandVariables {
 		else {
 			return null
 		}
+	}
+
+	/** Format a command by formatting each piece of command. */
+	export async function formatCommand(command: string, uri: vscode.Uri, pathSeparator: PathSeparator | undefined): Promise<string> {
+		if (!command) {
+			return ''
+		}
+
+		// If white spaces exist in file name or directory name, we need to wrap them with `""`.
+		// We do this by testing each piece, and wrap them each when needed.
+		return formatCommandPieces(command, async (piece) => {
+			return CommandVariables.format(piece, uri, pathSeparator)
+		})
 	}
 }

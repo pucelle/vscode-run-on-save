@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import {formatCommandPieces, encodeCommandLineToBeQuotedIf} from './util'
+import {encodeCommandLineToBeQuotedIf} from './util'
 import {IOptions, Minimatch} from 'minimatch'
 import {CommandVariables} from './command-variables'
 import * as path from 'path'
@@ -93,13 +93,15 @@ export class CommandProcessor {
 			}
 
 			let pathSeparator = command.forcePathSeparator
+			let formattedCommand = await CommandVariables.formatCommand(commandString, document.uri, pathSeparator)
+			let commandWithArgs = await this.formatCommandWithArgs(formattedCommand, command.args, document.uri, pathSeparator)
 
 			if (command.runIn === 'backend') {
 				preparedCommands.push({
 					runIn: 'backend',
-					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, document.uri), command.args),
-					runningStatusMessage: await this.formatVariables(command.runningStatusMessage, pathSeparator, document.uri),
-					finishStatusMessage: await this.formatVariables(command.finishStatusMessage, pathSeparator, document.uri),
+					command: commandWithArgs,
+					runningStatusMessage: await CommandVariables.format(command.runningStatusMessage, document.uri, pathSeparator),
+					finishStatusMessage: await CommandVariables.format(command.finishStatusMessage, document.uri, pathSeparator),
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
 					doNotDisturb: command.doNotDisturb ?? false,
@@ -108,7 +110,7 @@ export class CommandProcessor {
 			else if (command.runIn === 'terminal') {
 				preparedCommands.push({
 					runIn: 'terminal',
-					command: this.formatArgs(await this.formatCommandString(commandString, pathSeparator, document.uri), command.args),
+					command: commandWithArgs,
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
 					doNotDisturb: command.doNotDisturb ?? false,
@@ -117,7 +119,7 @@ export class CommandProcessor {
 			else {
 				preparedCommands.push({
 					runIn: 'vscode',
-					command: await this.formatCommandString(commandString, pathSeparator, document.uri),
+					command: commandWithArgs,
 					args: command.args,
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
@@ -186,7 +188,7 @@ export class CommandProcessor {
 		}
 
 		if (/\${(?:\w+:)?[\w\.]+}/.test(globMatch)) {
-			globMatch = await this.formatVariables(globMatch, undefined, uri)
+			globMatch = await CommandVariables.format(globMatch, uri, undefined)
 		}
 
 		let gm = new Minimatch(globMatch, globMatchOptions)
@@ -205,35 +207,16 @@ export class CommandProcessor {
 		return false
 	}
 
-	private async formatCommandString(command: string, pathSeparator: PathSeparator | undefined, uri: vscode.Uri): Promise<string> {
-		if (!command) {
-			return ''
-		}
-
-		// If white spaces exist in file name or directory name, we need to wrap them with `""`.
-		// We do this by testing each piece, and wrap them if needed.
-		return formatCommandPieces(command, async (piece) => {
-			return CommandVariables.format(piece, uri, pathSeparator)
-		})
-	}
-
-	private async formatVariables(message: string, pathSeparator: PathSeparator | undefined, uri: vscode.Uri): Promise<string> {
-		if (!message) {
-			return ''
-		}
-
-		return CommandVariables.format(message, uri, pathSeparator)
-	}
 
 	/** Add args to a command string. */
-	private formatArgs(command: string, args: string[] | object | string | undefined): string {
+	private async formatCommandWithArgs(command: string, args: string[] | object | string | undefined, uri: vscode.Uri, pathSeparator: string | undefined): Promise<string> {
 		if (!args) {
 			return command
 		}
 
 		if (Array.isArray(args)) {
 			for (let arg of args) {
-				command += ' ' + encodeCommandLineToBeQuotedIf(arg)
+				command += ' ' + encodeCommandLineToBeQuotedIf(await CommandVariables.format(arg, uri, pathSeparator))
 			}
 		}
 		else if (typeof args === 'string') {
@@ -241,7 +224,7 @@ export class CommandProcessor {
 		}
 		else if (typeof args === 'object') {
 			for (let [key, value] of Object.entries(args)) {
-				command += ' ' + key + ' ' + encodeCommandLineToBeQuotedIf(value)
+				command += ' ' + key + ' ' + encodeCommandLineToBeQuotedIf(await CommandVariables.format(value, uri, pathSeparator))
 			}
 		}
 
