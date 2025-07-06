@@ -40,6 +40,7 @@ Note, `languages`, `match`, `globMatch` work like filter, if specifies more than
 | `commands[].match`                | Specify RegExp source string, files which's path match will be included. E.g.: `\\.scss$` can used to match scss files.
 | `commands[].notMatch`             | Specify RegExp source string, files which's path match will be excluded even they were included by `match` or `globMatch`. E.g.: `[\\\\\\/]_[\\w-]+\\.scss$` can be used to exclude scss library files.
 | `commands[].globMatch`            | Specify a glob expression, to match the whole file path or the relative path relative to current workspace directory. the matched files will be included. E.g.: `**/*.scss` will match all scss files, `*.scss` will match all scss files located in current workspace directory.
+| `commands[].globMatchOptions`     | Specify glob match options for  `globMatch` expression above, see [Minimatch Options](https://github.com/isaacs/minimatch?tab=readme-ov-file#options). |
 | `commands[].command`              | Specify the shell command to execute. You may include variable substitution like what to do in [VSCode Tasks](https://code.visualstudio.com/docs/editor/tasks#_variable-substitution).
 | `commands[].commandBeforeSaving`  | Same as `commands`, but runs it before saving action happens, and document is not saved yet.
 | `commands[].args`                 | Specify the command parameters, can be a string, array of string, or an object.
