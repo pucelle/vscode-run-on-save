@@ -189,6 +189,91 @@
 								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer. Note if specifies both `match` and `globMatch`, only commands matched them both will be executed.",
 								"default": ""
 							},
+							"doNotDisturb": {
+								"type": "boolean",
+								"description": "By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend` or `runIn=terminal`.",
+								"default": false
+							},
+							"globMatchOpts": {
+								"type": "object",
+								"description": "https://github.com/isaacs/minimatch/blob/0569cd3373408f9d701d3aab187b3f43a24a0db7/src/index.ts#L20",
+								"additionalProperties": false,
+								"properties": {
+									"allowWindowsEscape": {
+										"type": "boolean"
+									},
+									"debug": {
+										"type": "boolean"
+									},
+									"dot": {
+										"type": "boolean"
+									},
+									"flipNegate": {
+										"type": "boolean"
+									},
+									"magicalBraces": {
+										"type": "boolean"
+									},
+									"matchBase": {
+										"type": "boolean"
+									},
+									"nobrace": {
+										"type": "boolean"
+									},
+									"nocase": {
+										"type": "boolean"
+									},
+									"nocaseMagicOnly": {
+										"type": "boolean"
+									},
+									"nocomment": {
+										"type": "boolean"
+									},
+									"noext": {
+										"type": "boolean"
+									},
+									"noglobstar": {
+										"type": "boolean"
+									},
+									"nonegate": {
+										"type": "boolean"
+									},
+									"nonull": {
+										"type": "boolean"
+									},
+									"optimizationLevel": {
+										"type": "number"
+									},
+									"partial": {
+										"type": "boolean"
+									},
+									"platform": {
+										"enum": [
+											"aix",
+											"android",
+											"darwin",
+											"freebsd",
+											"haiku",
+											"linux",
+											"openbsd",
+											"sunos",
+											"win32",
+											"cygwin",
+											"netbsd"
+										],
+										"type": "string"
+									},
+									"preserveMultipleSlashes": {
+										"type": "boolean"
+									},
+									"windowsNoMagicRoot": {
+										"type": "boolean"
+									},
+									"windowsPathsNoEscape": {
+										"type": "boolean"
+									}
+								}
+							},
 							"commandBeforeSaving": {
 								"type": "string",
 								"description": "Specify the command to be executed before saving the file. Note that for backend command, file will be saved after command executed completed.",
@@ -362,6 +447,86 @@
 								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer. Note if specifies both `match` and `globMatch`, only commands matched them both will be executed.",
 								"default": ""
 							},
+							"globMatchOpts": {
+								"type": "object",
+								"description": "https://github.com/isaacs/minimatch/blob/0569cd3373408f9d701d3aab187b3f43a24a0db7/src/index.ts#L20",
+								"additionalProperties": false,
+								"properties": {
+									"allowWindowsEscape": {
+										"type": "boolean"
+									},
+									"debug": {
+										"type": "boolean"
+									},
+									"dot": {
+										"type": "boolean"
+									},
+									"flipNegate": {
+										"type": "boolean"
+									},
+									"magicalBraces": {
+										"type": "boolean"
+									},
+									"matchBase": {
+										"type": "boolean"
+									},
+									"nobrace": {
+										"type": "boolean"
+									},
+									"nocase": {
+										"type": "boolean"
+									},
+									"nocaseMagicOnly": {
+										"type": "boolean"
+									},
+									"nocomment": {
+										"type": "boolean"
+									},
+									"noext": {
+										"type": "boolean"
+									},
+									"noglobstar": {
+										"type": "boolean"
+									},
+									"nonegate": {
+										"type": "boolean"
+									},
+									"nonull": {
+										"type": "boolean"
+									},
+									"optimizationLevel": {
+										"type": "number"
+									},
+									"partial": {
+										"type": "boolean"
+									},
+									"platform": {
+										"enum": [
+											"aix",
+											"android",
+											"darwin",
+											"freebsd",
+											"haiku",
+											"linux",
+											"openbsd",
+											"sunos",
+											"win32",
+											"cygwin",
+											"netbsd"
+										],
+										"type": "string"
+									},
+									"preserveMultipleSlashes": {
+										"type": "boolean"
+									},
+									"windowsNoMagicRoot": {
+										"type": "boolean"
+									},
+									"windowsPathsNoEscape": {
+										"type": "boolean"
+									}
+								}
+							},
 							"commandBeforeSaving": {
 								"type": "string",
 								"description": "Specify the command to be executed before saving the file. Note that for backend command, file will be saved after command executed completed.",
@@ -433,7 +598,7 @@
 							},
 							"doNotDisturb": {
 								"type": "boolean",
-								"description": "By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend`.",
+								"description": "By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend` or `runIn=terminal`.",
 								"default": false
 							}
 						}
@@ -444,13 +609,13 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run build",
+		"package": "npx @vscode/vsce package",
 		"build": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"test": "cd test && tsc -b && vscode-test"
 	},
 	"devDependencies": {
 		"@types/fs-extra": "^11.0.1",
-		"@types/minimatch": "^3.0.5",
 		"@types/mocha": "^2.2.48",
 		"@types/node": "^20.5.4",
 		"@types/vscode": "^1.81.0",
@@ -460,6 +625,6 @@
 	},
 	"dependencies": {
 		"fs-extra": "^11.1.1",
-		"minimatch": "^3.1.2"
+		"minimatch": "^10.0.1"
 	}
 }
