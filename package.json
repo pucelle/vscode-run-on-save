@@ -3,7 +3,7 @@
 	"displayName": "Run on Save",
 	"description": "Run configured shell commands when a file is saved in vscode, and output configured messages on status bar.",
 	"icon": "images/logo.png",
-	"version": "1.10.2",
+	"version": "1.11.0",
 	"license": "MIT",
 	"publisher": "pucelle",
 	"homepage": "https://github.com/pucelle/vscode-run-on-save",
@@ -194,9 +194,9 @@
 								"description": "By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend` or `runIn=terminal`.",
 								"default": false
 							},
-							"globMatchOpts": {
+							"globMatchOptions": {
 								"type": "object",
-								"description": "https://github.com/isaacs/minimatch/blob/0569cd3373408f9d701d3aab187b3f43a24a0db7/src/index.ts#L20",
+								"description": "Options for glob match, see: https://github.com/isaacs/minimatch?tab=readme-ov-file#options",
 								"additionalProperties": false,
 								"properties": {
 									"allowWindowsEscape": {
@@ -447,9 +447,9 @@
 								"description": "Specify a glob expression to match file path. reference to: https://github.com/isaacs/node-glob#glob-primer. Note if specifies both `match` and `globMatch`, only commands matched them both will be executed.",
 								"default": ""
 							},
-							"globMatchOpts": {
+							"globMatchOptions": {
 								"type": "object",
-								"description": "https://github.com/isaacs/minimatch/blob/0569cd3373408f9d701d3aab187b3f43a24a0db7/src/index.ts#L20",
+								"description": "Options for glob match, see: https://github.com/isaacs/minimatch?tab=readme-ov-file#options",
 								"additionalProperties": false,
 								"properties": {
 									"allowWindowsEscape": {

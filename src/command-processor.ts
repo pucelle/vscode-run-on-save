@@ -1,18 +1,18 @@
 import * as vscode from 'vscode'
 import {formatCommandPieces, encodeCommandLineToBeQuotedIf} from './util'
-import { MinimatchOptions, Minimatch } from 'minimatch'
+import {IOptions, Minimatch} from 'minimatch'
 import {CommandVariables} from './command-variables'
 import * as path from 'path'
 import {Configuration, PathSeparator, RawCommand, VSCodeDocumentPartial} from './types'
 
 
-/** Processed command base, will be extended. */
+/** Processed command base, get extended by detailed command. */
 export interface ProcessedCommandBase {
 	languages?: string[]
 	match?: RegExp
 	notMatch?: RegExp
 	globMatch?: string
-	globMatchOpts? : MinimatchOptions
+	globMatchOptions? : IOptions
 	commandBeforeSaving?: string
 	command: string
 	args?: string[] | object | string
@@ -142,7 +142,7 @@ export class CommandProcessor {
 				continue
 			}
 
-			if (!await this.doGlobMatchTest(globMatch, document.uri, command.globMatchOpts)) {
+			if (!await this.doGlobMatchTest(globMatch, document.uri, command.globMatchOptions)) {
 				continue
 			}
 
@@ -180,7 +180,7 @@ export class CommandProcessor {
 		return true
 	}
 
-	private async doGlobMatchTest(globMatch: string | undefined, uri: vscode.Uri, globMatchOpts?: MinimatchOptions): Promise<boolean> {
+	private async doGlobMatchTest(globMatch: string | undefined, uri: vscode.Uri, globMatchOptions?: IOptions): Promise<boolean> {
 		if (!globMatch) {
 			return true
 		}
@@ -189,7 +189,7 @@ export class CommandProcessor {
 			globMatch = await this.formatVariables(globMatch, undefined, uri)
 		}
 
-		let gm = new Minimatch(globMatch, globMatchOpts)
+		let gm = new Minimatch(globMatch, globMatchOptions)
 
 		// If match whole path.
 		if (gm.match(uri.fsPath)) {

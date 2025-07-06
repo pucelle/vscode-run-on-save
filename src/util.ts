@@ -53,7 +53,7 @@ export function formatPathSeparator(path: string, pathSeparator: string | undefi
 }
 
 
-/** Resolves the returned promise after `ms` millseconds. */
+/** Resolves the returned promise after `ms` milliseconds. */
 export function timeout(ms: number): Promise<void> {
 	return new Promise(resolve => setTimeout(resolve, ms))
 }
