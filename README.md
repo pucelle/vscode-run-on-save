@@ -37,7 +37,7 @@ Note, `languages`, `match`, `globMatch` work like filter, if specifies more than
 | Name                              | Description
 | ---                               | ---
 | `commands[].languages`            | Specify an array of language ids to filter commands, when language matches command will run.
-| `commands[].match`                | Specify RegExp source string, files which's path match will be included. E.g.: `\\.scss$` can used to match scss files.
+| `commands[].match`                | Specify RegExp source string, files which's full file system path (Notice the slash separator difference on platforms) match will be included. E.g.: `\\.scss$` can used to match scss files.
 | `commands[].notMatch`             | Specify RegExp source string, files which's path match will be excluded even they were included by `match` or `globMatch`. E.g.: `[\\\\\\/]_[\\w-]+\\.scss$` can be used to exclude scss library files.
 | `commands[].globMatch`            | Specify a glob expression, to match the whole file path or the relative path relative to current workspace directory. the matched files will be included. E.g.: `**/*.scss` will match all scss files, `*.scss` will match all scss files located in current workspace directory.
 | `commands[].globMatchOptions`     | Specify glob match options for  `globMatch` expression above, see [Minimatch Options](https://github.com/isaacs/minimatch?tab=readme-ov-file#options). |

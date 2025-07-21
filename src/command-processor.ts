@@ -187,6 +187,7 @@ export class CommandProcessor {
 			return true
 		}
 
+		// Have variable interpolation.
 		if (/\${(?:\w+:)?[\w\.]+}/.test(globMatch)) {
 			globMatch = await CommandVariables.format(globMatch, uri, undefined)
 		}
