@@ -275,4 +275,24 @@ suite("Extension Tests", () => {
 			cache.clear()
 		})
 	})
+
+
+	suite('test for #50, German Umlaute (Ä Ü Ö)', function () {
+		let manager = new CommandProcessor()
+		manager.setRawCommands([<RawCommand>{
+			"match": "\\.gdl$",
+			"command": "${workspaceFolder}/runConv.fish ${file}",
+			"runIn": "backend",
+		}], 'backend')
+
+		test('will rightly pass parameter to fish command line', async function () {
+			let doc: VSCodeDocumentPartial = {
+				uri: vscode.Uri.file('/Users/runxel/dev/redactedreponame/objects/Übergangsmarker LX/Übergangsmarker LX/scripts/2d.gdl'),
+				languageId: 'gremlin',
+			}
+
+			let commands = await manager.prepareCommandsForFileAfterSaving(doc)
+			assert.deepStrictEqual(commands[0].command, "/runConv.fish \"\\Users\\runxel\\dev\\redactedreponame\\objects\\Übergangsmarker LX\\Übergangsmarker LX\\scripts\\2d.gdl\"".replace(/\\/g, path.sep))
+		})
+	})
 })

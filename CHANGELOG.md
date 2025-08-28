@@ -1,14 +1,21 @@
 # ChangeLog
 
+
+## [1.11.1]
+ - Try fix #50, and changes default encoding of backend command to `utf8`.
+
+
 ## [1.11.0]
  - Supports `globMatchOptions` to config glob match options.
  - Command parameters will be formatted by Variable Substitutions like `${file}`.
+
 
 ## [1.10.1]
  - Fix #49, when `workingDirectoryAsCWD` is `true`, and multiple root folders existing, `cwd` can be rightly choose the root folder that recently saved file belongs to.
 
 ## [1.10.0]
  - Merges `strawhat-dev@github`'s pull request, supports `commands[].languages` to do language id matching.
+
 
 ## [1.9.2]
  - `defaultRunIn` option now it's default value is `backend`, not `vscode`. If your commands can't run, try specify this option.

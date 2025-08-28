@@ -168,8 +168,8 @@ export class RunOnSaveExtension {
 		}
 		
 		let shell = this.getShellPath()
-
-		return shell ? exec(command, { shell, cwd }) : exec(command, { cwd })
+		
+		return shell ? exec(command, { shell, cwd, encoding: 'utf8' }) : exec(command, { cwd })
 	}
 
 	private getShellPath(): string | undefined {
