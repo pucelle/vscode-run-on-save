@@ -142,8 +142,16 @@ export class RunOnSaveExtension {
 			}
 
 			let child = this.execShellCommand(command.command, command.workingDirectoryAsCWD ?? true, uri)
-			child.stdout!.on('data', data => this.channel.append(data.toString()))
-			child.stderr!.on('data', data => this.channel.append(data.toString()))
+			child.stdout!.on('data', data => {
+				// Explicitly handle UTF-8 encoding for German Umlaute and other Unicode characters
+				const output = typeof data === 'string' ? data : data.toString('utf8')
+				this.channel.append(output)
+			})
+			child.stderr!.on('data', data => {
+				// Explicitly handle UTF-8 encoding for German Umlaute and other Unicode characters
+				const output = typeof data === 'string' ? data : data.toString('utf8')
+				this.channel.append(output)
+			})
 
 			child.on('exit', (e) => {
 				if (e === 0 && command.finishStatusMessage) {
@@ -168,8 +176,15 @@ export class RunOnSaveExtension {
 		}
 		
 		let shell = this.getShellPath()
-		
-		return shell ? exec(command, { shell, cwd, encoding: 'utf8' }) : exec(command, { cwd })
+
+		// Set encoding to utf8 and configure environment to ensure proper UTF-8 handling
+		const execOptions = {
+			cwd,
+			encoding: 'utf8' as const,
+			env: { ...process.env, LC_ALL: 'en_US.UTF-8', LANG: 'en_US.UTF-8' }
+		}
+
+		return shell ? exec(command, { shell, ...execOptions }) : exec(command, execOptions)
 	}
 
 	private getShellPath(): string | undefined {
