@@ -1,4 +1,4 @@
-import {exec, ChildProcess} from 'child_process'
+import {exec, ChildProcess, ExecOptions} from 'child_process'
 import * as vscode from 'vscode'
 import {CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand, ProcessedCommand} from './command-processor'
 import {FleetingDoubleKeysCache, timeout} from './util'
@@ -178,13 +178,13 @@ export class RunOnSaveExtension {
 		let shell = this.getShellPath()
 
 		// Set encoding to utf8 and configure environment to ensure proper UTF-8 handling
-		const execOptions = {
+		const execOptions: ExecOptions & {encoding: BufferEncoding} = {
 			cwd,
-			encoding: 'utf8' as const,
-			env: { ...process.env, LC_ALL: 'en_US.UTF-8', LANG: 'en_US.UTF-8' }
+			encoding: 'utf8',
+			env: { ...process.env, LC_ALL: 'en_US.UTF-8', LANG: 'en_US.UTF-8' },
 		}
 
-		return shell ? exec(command, { shell, ...execOptions }) : exec(command, execOptions)
+		return exec(command, { shell, ...execOptions })
 	}
 
 	private getShellPath(): string | undefined {

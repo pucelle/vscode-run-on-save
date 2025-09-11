@@ -1,6 +1,9 @@
 # ChangeLog
 
 
+## [1.11.2]
+ - Fixes #50, merges commits from `runxel@github`.
+
 ## [1.11.1]
  - Try fix #50, and changes default encoding of backend command to `utf8`.
 
