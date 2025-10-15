@@ -223,7 +223,14 @@ export class RunOnSaveExtension {
 		this.showChannelMessage(`Running "${command.command}"`)
 
 		let args = this.formatVSCodeCommandArgs(command.args)
-		await vscode.commands.executeCommand(command.command, ...args)
+
+		// If run vscode commands and got 4 times error, vscode will refuse keep listening this file.
+		try {
+			await vscode.commands.executeCommand(command.command, ...args)
+		}
+		catch (err) {
+			vscode.window.showErrorMessage(`RunOnSave has failed to run vscode command: '${command.command}':\n${err}`)
+		}
 	}
 
 	private formatVSCodeCommandArgs(args: string | object | string[] | undefined): any[] {
