@@ -3,10 +3,10 @@ import * as vscode from 'vscode'
 import {CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand, ProcessedCommand} from './command-processor'
 import {FleetingDoubleKeysCache, timeout} from './util'
 import {FileIgnoreChecker} from './file-ignore-checker'
-import {RawCommand, VSCodeDocument} from './types'
+import {RawCommand, VSCodeDocument, RunOnSavePluginExport} from './types'
 
 
-export class RunOnSaveExtension {
+export class RunOnSaveExtension implements RunOnSavePluginExport{
 
 	private context: vscode.ExtensionContext
 	private config!: vscode.WorkspaceConfiguration

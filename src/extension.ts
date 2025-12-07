@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
-import {RunOnSaveExtension} from './run-on-save';
+import * as vscode from 'vscode'
+import {RunOnSaveExtension} from './run-on-save'
 
 
 export function activate(context: vscode.ExtensionContext): RunOnSaveExtension {

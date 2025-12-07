@@ -143,13 +143,35 @@ To better distinguish file path associated variables, assume you have opened a w
 | `${fileDirnameRelative}`     | `folderName/subFolderName`
 
 
-
 ## Commands
 
 The following commands are exposed in the command palette
 
 - `Run On Save: Enable` - to enable the extension
 - `Run On Save: Disable` - to disable the extension
+
+
+## Plugin export
+
+For plugin developer to operate this plugin:
+
+```ts
+/** Stable `run-on-save` plugin output. */
+export interface RunOnSavePluginExport {
+
+	/** Get whether this plugin is enabled. */
+	getEnabled(): boolean
+
+	/** Set enabled state of this plugin. */
+	setEnabled(enabled: boolean): void
+
+	/** Before a document save. */
+	onWillSaveDocument(document: VSCodeDocument, reason: vscode.TextDocumentSaveReason): Promise<void>
+
+	/** After a document saved. */
+	onDocumentSaved(document: VSCodeDocument): Promise<void>
+}
+```
 
 
 ## References
