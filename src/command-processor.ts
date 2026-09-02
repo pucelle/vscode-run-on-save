@@ -21,6 +21,8 @@ export interface ProcessedCommandBase {
 	async?: boolean
 	clearOutput?: boolean
 	doNotDisturb?: boolean
+	commandDebounce?: number
+	debounceKey?: string
 }
 
 export interface BackendCommand extends ProcessedCommandBase {
@@ -48,25 +50,28 @@ export interface VSCodeCommand extends ProcessedCommandBase {
 
 export type ProcessedCommand = BackendCommand | TerminalCommand | VSCodeCommand
 
+type ConfiguredCommand = ProcessedCommand & {debounceId: number}
+
 
 
 export class CommandProcessor {
 
-	private commands: ProcessedCommand[] = []
+	private commands: ConfiguredCommand[] = []
 
 	setRawCommands(commands: RawCommand[], defaultRunIn: Configuration['defaultRunIn']) {
 		this.commands = this.processCommands(commands, defaultRunIn)
 	}
 
-	private processCommands(commands: RawCommand[], defaultRunIn: Configuration['defaultRunIn']): ProcessedCommand[] {
-		return commands.map(command => {
+	private processCommands(commands: RawCommand[], defaultRunIn: Configuration['defaultRunIn']): ConfiguredCommand[] {
+		return commands.map((command, debounceId) => {
 			return Object.assign({}, command, {
+				debounceId,
 				runIn: command.runIn || defaultRunIn || 'backend',
 				languages: command.languages,
 				match: command.match ? new RegExp(command.match, 'i') : undefined,
 				notMatch: command.notMatch ? new RegExp(command.notMatch, 'i') : undefined,
 				globMatch: command.globMatch ? command.globMatch : undefined
-			}) as ProcessedCommand
+			}) as ConfiguredCommand
 		})
 	}
 
@@ -81,11 +86,11 @@ export class CommandProcessor {
 	}
 
 	/** Prepare raw commands to link current working file. */
-	private async prepareCommandsForDocument(document: VSCodeDocumentPartial, forCommandsAfterSaving: boolean): Promise<ProcessedCommand[]> {
+	private async prepareCommandsForDocument(document: VSCodeDocumentPartial, beforeSaving: boolean): Promise<ProcessedCommand[]> {
 		let preparedCommands: ProcessedCommand[] = []
 
 		for (let command of await this.filterCommandsByDocument(document)) {
-			let commandString = forCommandsAfterSaving
+			let commandString = beforeSaving
 				? command.commandBeforeSaving
 				: command.command
 
@@ -96,6 +101,7 @@ export class CommandProcessor {
 			let pathSeparator = command.forcePathSeparator
 			let formattedCommand = await CommandVariables.formatCommand(commandString, document.uri, pathSeparator)
 			let commandWithArgs = await this.formatCommandWithArgs(formattedCommand, command.args, document.uri, pathSeparator)
+			let debounce = this.prepareDebounce(command, beforeSaving)
 
 			if (command.runIn === 'backend') {
 				preparedCommands.push({
@@ -106,6 +112,7 @@ export class CommandProcessor {
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
 					doNotDisturb: command.doNotDisturb ?? false,
+					...debounce,
 				} as BackendCommand)
 			}
 			else if (command.runIn === 'terminal') {
@@ -116,6 +123,7 @@ export class CommandProcessor {
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
 					doNotDisturb: command.doNotDisturb ?? false,
+					...debounce,
 				} as TerminalCommand)
 			}
 			else {
@@ -125,6 +133,7 @@ export class CommandProcessor {
 					args: command.args,
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
+					...debounce,
 				} as VSCodeCommand)
 			}
 		}
@@ -132,7 +141,19 @@ export class CommandProcessor {
 		return preparedCommands
 	}
 
-	private async filterCommandsByDocument(document: VSCodeDocumentPartial): Promise<ProcessedCommand[]> {
+	private prepareDebounce(command: ConfiguredCommand, beforeSaving: boolean): Pick<ProcessedCommandBase, 'commandDebounce' | 'debounceKey'> {
+		let commandDebounce = Math.max(0, command.commandDebounce ?? 0)
+		if (commandDebounce === 0) {
+			return {}
+		}
+
+		return {
+			commandDebounce,
+			debounceKey: `${command.debounceId}:${beforeSaving ? 'before' : 'after'}`,
+		}
+	}
+
+	private async filterCommandsByDocument(document: VSCodeDocumentPartial): Promise<ConfiguredCommand[]> {
 		let filteredCommands = []
 
 		for (let command of this.commands) {

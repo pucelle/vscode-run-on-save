@@ -1,7 +1,7 @@
 import {exec, ChildProcess, ExecOptions} from 'child_process'
 import * as vscode from 'vscode'
 import {CommandProcessor, BackendCommand, TerminalCommand, VSCodeCommand, ProcessedCommand} from './command-processor'
-import {FleetingDoubleKeysCache, timeout} from './util'
+import {FleetingDoubleKeysCache, PromiseDebouncer, timeout} from './util'
 import {FileIgnoreChecker} from './file-ignore-checker'
 import {RawCommand, VSCodeDocument, RunOnSavePluginExport} from './types'
 
@@ -15,6 +15,7 @@ export class RunOnSaveExtension implements RunOnSavePluginExport{
 	private config!: vscode.WorkspaceConfiguration
 	private channel: vscode.OutputChannel = vscode.window.createOutputChannel('Run on Save')
 	private commandProcessor: CommandProcessor = new CommandProcessor()
+	private commandDebouncer: PromiseDebouncer<string> = new PromiseDebouncer()
 
 	/** A record of document uris and document versions to save reasons. */
 	private documentSaveReasonCache: FleetingDoubleKeysCache<string, number, vscode.TextDocumentSaveReason>
@@ -25,11 +26,14 @@ export class RunOnSaveExtension implements RunOnSavePluginExport{
 		this.loadConfig()
 		this.showEnablingChannelMessage()
 
-		context.subscriptions.push(this.channel)
+		context.subscriptions.push(this.channel, {
+			dispose: () => this.commandDebouncer.clear()
+		})
 	}
 
 	/** Load or reload configuration. */
 	loadConfig() {
+		this.commandDebouncer.clear()
 		this.config = vscode.workspace.getConfiguration('runOnSave')
 		this.commandProcessor.setRawCommands(<RawCommand[]>this.config.get('commands') || [], this.config.get('defaultRunIn')!)
 	}
@@ -119,6 +123,18 @@ export class RunOnSaveExtension implements RunOnSavePluginExport{
 	}
 
 	private runACommand(command: ProcessedCommand, uri: vscode.Uri): Promise<void> {
+		if (command.commandDebounce && command.debounceKey) {
+			return this.commandDebouncer.run(
+				command.debounceKey,
+				command.commandDebounce,
+				() => this.runACommandImmediately(command, uri)
+			)
+		}
+
+		return this.runACommandImmediately(command, uri)
+	}
+
+	private runACommandImmediately(command: ProcessedCommand, uri: vscode.Uri): Promise<void> {
 		if (command.clearOutput) {
 			this.channel.clear()
 		}

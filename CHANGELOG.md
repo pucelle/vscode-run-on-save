@@ -1,5 +1,11 @@
 # ChangeLog
 
+
+## [1.12.0]
+- Support `terminalReveal` option to control terminal visibility.
+- Support `commandDebounce` option to debounce command, for #58.
+
+
 ## [1.11.3]
 - Fixes #57, show an error message if failed to run vscode command.
 

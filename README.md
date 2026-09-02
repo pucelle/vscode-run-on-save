@@ -46,6 +46,7 @@ Note, `languages`, `match`, `globMatch` work like filter, if specifies more than
 | `commands[].args`                 | Specify the command parameters, can be a string, array of string, or an object.
 | `commands[].forcePathSeparator`   | Force path separator in variable substitution to be `/`, `\\`, default is not specified.
 | `commands[].async`                | All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`. |
+| `commands[].commandDebounce`      | Wait this many milliseconds after the latest matching save before running the command. Additional saves reset the timer, and the final command uses variables from the latest saved file. Default is `0` (disabled). |
 | `commands[].runningStatusMessage` | Specify the status bar message when the shell command begin to run, supports variable substitution too. Only works when `runIn=backend`.
 | `commands[].finishStatusMessage`  | Specify the status bar message after the shell command finished executing, also supports variable substitution. Only works when `runIn=backend`.
 | `commands[].statusMessageTimeout` | Specify the timeout milliseconds of current message, after which the status bar message will hide, default value is `3000`, means 3 seconds.

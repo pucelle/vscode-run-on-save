@@ -313,6 +313,12 @@
 								"description": "All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`.",
 								"default": true
 							},
+							"commandDebounce": {
+								"type": "number",
+								"description": "Wait this many milliseconds after the latest matching save before running the command. Additional saves reset the timer, and the final command uses variables from the latest saved file. Default is `0` (disabled).",
+								"minimum": 0,
+								"default": 0
+							},
 							"runningStatusMessage": {
 								"type": "string",
 								"description": "Specify the status bar message when the shell command began to run. Only works when `runIn=backend`.",
@@ -575,6 +581,12 @@
 								"type": "boolean",
 								"description": "All the commands with `async: false` will run in a sequence, means run next after previous completed. Default value is `true`.",
 								"default": true
+							},
+							"commandDebounce": {
+								"type": "number",
+								"description": "Wait this many milliseconds after the latest matching save before running the command. Additional saves reset the timer, and the final command uses variables from the latest saved file. Default is `0` (disabled).",
+								"minimum": 0,
+								"default": 0
 							},
 							"runningStatusMessage": {
 								"type": "string",

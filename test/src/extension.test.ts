@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 import {CommandProcessor, TerminalCommand} from '../../out/command-processor'
 import {FileIgnoreChecker} from '../../out/file-ignore-checker'
-import {FleetingDoubleKeysCache} from '../../out/util'
+import {FleetingDoubleKeysCache, PromiseDebouncer} from '../../out/util'
 import {RawCommand, VSCodeDocumentPartial} from '../../out/types'
 
 
@@ -118,6 +118,72 @@ suite("Extension Tests", () => {
 				'clearOutput': false,
 				'doNotDisturb': false,
 			}])
+		})
+	})
+
+
+	suite('test commandDebounce', function () {
+		test('keeps the same debounce key while using the latest file variables', async function () {
+			let manager = new CommandProcessor()
+			manager.setRawCommands([{
+				runIn: 'backend',
+				command: 'echo ${fileBasename}',
+				commandBeforeSaving: 'prepare ${fileBasename}',
+				commandDebounce: 100,
+			}], 'backend')
+
+			let first = await manager.prepareCommandsForFileAfterSaving({
+				uri: vscode.Uri.file('C:/folderName/file1.ts')
+			})
+			let last = await manager.prepareCommandsForFileAfterSaving({
+				uri: vscode.Uri.file('C:/folderName/file3.ts')
+			})
+			let before = await manager.prepareCommandsForFileBeforeSaving({
+				uri: vscode.Uri.file('C:/folderName/file3.ts')
+			})
+
+			assert.equal(first[0].command, 'echo file1.ts')
+			assert.equal(last[0].command, 'echo file3.ts')
+			assert.equal(first[0].commandDebounce, 100)
+			assert.equal(first[0].debounceKey, last[0].debounceKey)
+			assert.notEqual(last[0].debounceKey, before[0].debounceKey)
+		})
+
+		test('runs only the latest callback after the delay', async function () {
+			let debouncer = new PromiseDebouncer<string>()
+			let values: number[] = []
+
+			let promises = [
+				debouncer.run('command', 20, async () => { values.push(1) }),
+				debouncer.run('command', 20, async () => { values.push(2) }),
+				debouncer.run('command', 20, async () => { values.push(3) }),
+			]
+
+			await Promise.all(promises)
+			assert.deepStrictEqual(values, [3])
+		})
+
+		test('debounces different command entries independently', async function () {
+			let manager = new CommandProcessor()
+			manager.setRawCommands([
+				{command: 'first', commandDebounce: 20},
+				{command: 'second', commandDebounce: 20},
+			], 'backend')
+			let commands = await manager.prepareCommandsForFileAfterSaving({
+				uri: vscode.Uri.file('C:/folderName/file.ts')
+			})
+
+			assert.notEqual(commands[0].debounceKey, commands[1].debounceKey)
+
+			let debouncer = new PromiseDebouncer<string>()
+			let values: string[] = []
+
+			await Promise.all([
+				debouncer.run('first', 20, async () => { values.push('first') }),
+				debouncer.run('second', 20, async () => { values.push('second') }),
+			])
+
+			assert.deepStrictEqual(values.sort(), ['first', 'second'])
 		})
 	})
 

@@ -26,6 +26,7 @@ export interface RawCommand {
 	clearOutput?: boolean
 	doNotDisturb?: boolean
 	terminalReveal?: TerminalReveal
+	commandDebounce?: number
 }
 
 export type PathSeparator = '/' | '\\'

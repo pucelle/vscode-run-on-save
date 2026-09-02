@@ -59,6 +59,80 @@ export function timeout(ms: number): Promise<void> {
 }
 
 
+interface DebouncedCall {
+	timer?: ReturnType<typeof setTimeout>
+	callback: () => Promise<void>
+	waiters: Array<{
+		resolve: () => void
+		reject: (error: unknown) => void
+	}>
+}
+
+/** Runs only the latest callback for each key after the key has been idle for the specified delay. */
+export class PromiseDebouncer<K> {
+
+	private calls: Map<K, DebouncedCall> = new Map()
+
+	run(key: K, delay: number, callback: () => Promise<void>): Promise<void> {
+		if (delay <= 0) {
+			return callback()
+		}
+
+		let previousCall = this.calls.get(key)
+		if (previousCall?.timer) {
+			clearTimeout(previousCall.timer)
+		}
+
+		let call: DebouncedCall = {
+			callback,
+			waiters: previousCall?.waiters ?? [],
+		}
+
+		let promise = new Promise<void>((resolve, reject) => {
+			call.waiters.push({resolve, reject})
+		})
+
+		call.timer = setTimeout(() => this.execute(key, call), delay)
+		this.calls.set(key, call)
+
+		return promise
+	}
+
+	clear() {
+		for (let call of this.calls.values()) {
+			if (call.timer) {
+				clearTimeout(call.timer)
+			}
+			for (let waiter of call.waiters) {
+				waiter.resolve()
+			}
+		}
+
+		this.calls.clear()
+	}
+
+	private async execute(key: K, call: DebouncedCall) {
+		if (this.calls.get(key) !== call) {
+			return
+		}
+
+		this.calls.delete(key)
+
+		try {
+			await call.callback()
+			for (let waiter of call.waiters) {
+				waiter.resolve()
+			}
+		}
+		catch (error) {
+			for (let waiter of call.waiters) {
+				waiter.reject(error)
+			}
+		}
+	}
+}
+
+
 /** Do RegExp replacing asynchronously. */
 export async function replaceAsync(str: string, re: RegExp, replacer: (...matches: string[]) => Promise<string>): Promise<string> {
 	let replacements = await Promise.all(
