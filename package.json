@@ -15,7 +15,7 @@
 		"url": "https://github.com/pucelle/vscode-run-on-save/issues"
 	},
 	"engines": {
-		"vscode": "^1.81.0"
+		"vscode": "^1.93.0"
 	},
 	"categories": [
 		"Other"
@@ -191,7 +191,7 @@
 							},
 							"doNotDisturb": {
 								"type": "boolean",
-								"description": "By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend` or `runIn=terminal`.",
+								"description": "Prevent the output from taking focus. For terminal visibility, prefer `terminalReveal`. Only works when `runIn=backend` or `runIn=terminal`.",
 								"default": false
 							},
 							"globMatchOptions": {
@@ -332,6 +332,16 @@
 								"type": "number",
 								"description": "Specify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
 								"default": -1
+							},
+							"terminalReveal": {
+								"type": "string",
+								"description": "Control when the terminal is revealed. `onError` requires VS Code terminal shell integration and falls back to `always` when unavailable. Only works when `runIn=terminal`. For terminal command ignores `doNotDisturb` after setting this option",
+								"enum": [
+									"always",
+									"onError",
+									"never"
+								],
+								"default": "always"
 							},
 							"workingDirectoryAsCWD": {
 								"type": "boolean",
@@ -586,6 +596,16 @@
 								"description": "Specify the timeout in millisecond after which the terminal for running current command will hide. Only works when `runIn=terminal`. If default value is `-1`, set it as a value `>=0` can make it work.",
 								"default": -1
 							},
+							"terminalReveal": {
+								"type": "string",
+								"description": "Control when the terminal is revealed. `onError` requires VS Code terminal shell integration and falls back to `always` when unavailable. Only works when `runIn=terminal`.",
+								"enum": [
+									"always",
+									"onError",
+									"never"
+								],
+								"default": "always"
+							},
 							"workingDirectoryAsCWD": {
 								"type": "boolean",
 								"description": "Specify the vscode working directory as shell CWD (Current Working Directory). Only works when `runIn=backend`.",
@@ -598,7 +618,7 @@
 							},
 							"doNotDisturb": {
 								"type": "boolean",
-								"description": "By default, output tab would get focus after receiving non-zero exit codes. Set this option to `true` can prevent it. Only works when `runIn=backend` or `runIn=terminal`.",
+								"description": "Prevent the output from taking focus. For terminal visibility, prefer `terminalReveal` detailed control. Only works when `runIn=backend` or `runIn=terminal`.",
 								"default": false
 							}
 						}
@@ -618,7 +638,7 @@
 		"@types/fs-extra": "^11.0.1",
 		"@types/mocha": "^2.2.48",
 		"@types/node": "^20.5.4",
-		"@types/vscode": "^1.81.0",
+		"@types/vscode": "^1.93.0",
 		"@vscode/test-cli": "0.0.4",
 		"@vscode/test-electron": "^2.3.8",
 		"typescript": "^4.9.5"

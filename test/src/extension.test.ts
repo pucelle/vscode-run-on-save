@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 import * as path from 'path'
 import * as vscode from 'vscode'
-import {CommandProcessor} from '../../out/command-processor'
+import {CommandProcessor, TerminalCommand} from '../../out/command-processor'
 import {FileIgnoreChecker} from '../../out/file-ignore-checker'
 import {FleetingDoubleKeysCache} from '../../out/util'
 import {RawCommand, VSCodeDocumentPartial} from '../../out/types'
@@ -154,6 +154,7 @@ suite("Extension Tests", () => {
 			'notMatch': '[\\\\\\/]_[^\\\\\\/]*\\.scss$',
 			'runIn': 'terminal',
 			'command': 'node-sass ${file} ${fileDirname}/${fileBasenameNoExtension}.css',
+			'terminalReveal': 'onError',
 			'forcePathSeparator': '/',
 		}], 'backend')
 
@@ -166,10 +167,42 @@ suite("Extension Tests", () => {
 			assert.deepStrictEqual(commands, [{
 				'runIn': 'terminal',
 				'command': 'node-sass c:/folderName/fileName.scss c:/folderName/fileName.css',
+				'terminalReveal': 'onError',
 				'async': true,
 				'clearOutput': false,
 				"doNotDisturb": false,
 			}])
+		})
+
+		test('defaults to revealing the terminal', async function () {
+			let defaultManager = new CommandProcessor()
+			defaultManager.setRawCommands([{
+				runIn: 'terminal',
+				command: 'echo ${fileBasename}',
+			}], 'backend')
+
+			let commands = await defaultManager.prepareCommandsForFileAfterSaving({
+				uri: vscode.Uri.file('C:/folderName/fileName.scss')
+			})
+
+			assert.equal(commands[0].runIn, 'terminal')
+			assert.equal((commands[0] as TerminalCommand).terminalReveal, 'always')
+		})
+
+		test('keeps doNotDisturb compatibility when terminalReveal is omitted', async function () {
+			let quietManager = new CommandProcessor()
+			quietManager.setRawCommands([{
+				runIn: 'terminal',
+				command: 'echo ${fileBasename}',
+				doNotDisturb: true,
+			}], 'backend')
+
+			let commands = await quietManager.prepareCommandsForFileAfterSaving({
+				uri: vscode.Uri.file('C:/folderName/fileName.scss')
+			})
+
+			assert.equal(commands[0].runIn, 'terminal')
+			assert.equal((commands[0] as TerminalCommand).terminalReveal, 'never')
 		})
 	})
 

@@ -25,9 +25,12 @@ export interface RawCommand {
 	async?: boolean
 	clearOutput?: boolean
 	doNotDisturb?: boolean
+	terminalReveal?: TerminalReveal
 }
 
 export type PathSeparator = '/' | '\\'
+
+export type TerminalReveal = 'always' | 'onError' | 'never'
 
 export type VSCodeDocument = vscode.TextDocument | vscode.NotebookDocument
 

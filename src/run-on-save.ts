@@ -6,6 +6,9 @@ import {FileIgnoreChecker} from './file-ignore-checker'
 import {RawCommand, VSCodeDocument, RunOnSavePluginExport} from './types'
 
 
+const TERMINAL_SHELL_INTEGRATION_TIMEOUT = 3000
+
+
 export class RunOnSaveExtension implements RunOnSavePluginExport{
 
 	private context: vscode.ExtensionContext
@@ -193,10 +196,35 @@ export class RunOnSaveExtension implements RunOnSavePluginExport{
 
 	private async runTerminalCommand(command: TerminalCommand) {
 		let terminal = this.createTerminal()
-		if (!command.doNotDisturb) {
+		if (command.terminalReveal === 'always') {
 			terminal.show()
 		}
-		terminal.sendText(command.command)
+
+		if (command.terminalReveal === 'onError') {
+			let shellIntegration = await this.waitForTerminalShellIntegration(terminal)
+
+			if (shellIntegration) {
+				try {
+					let exitCode = await this.executeTerminalCommand(terminal, shellIntegration, command.command)
+					if (exitCode !== 0) {
+						terminal.show()
+					}
+				}
+				catch {
+					this.showChannelMessage('Failed to track the terminal command; revealing the terminal and retrying it normally.')
+					terminal.show()
+					terminal.sendText(command.command)
+				}
+			}
+			else {
+				this.showChannelMessage('Terminal shell integration is unavailable; revealing the terminal before running the command.')
+				terminal.show()
+				terminal.sendText(command.command)
+			}
+		}
+		else {
+			terminal.sendText(command.command)
+		}
 
 		await timeout(100)
 		await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup")
@@ -205,6 +233,60 @@ export class RunOnSaveExtension implements RunOnSavePluginExport{
 			await timeout(command.terminalHideTimeout!)
 			terminal.dispose()
 		}
+	}
+
+	private waitForTerminalShellIntegration(terminal: vscode.Terminal): Promise<vscode.TerminalShellIntegration | undefined> {
+		if (terminal.shellIntegration) {
+			return Promise.resolve(terminal.shellIntegration)
+		}
+
+		return new Promise(resolve => {
+			let disposable = vscode.window.onDidChangeTerminalShellIntegration(event => {
+				if (event.terminal === terminal) {
+					clearTimeout(timer)
+					disposable.dispose()
+					resolve(event.shellIntegration)
+				}
+			})
+			
+			let timer = setTimeout(() => {
+				disposable.dispose()
+				resolve(undefined)
+			}, TERMINAL_SHELL_INTEGRATION_TIMEOUT)
+		})
+	}
+
+	private executeTerminalCommand(
+		terminal: vscode.Terminal,
+		shellIntegration: vscode.TerminalShellIntegration,
+		command: string
+	): Promise<number | undefined> {
+		return new Promise((resolve, reject) => {
+			let execution: vscode.TerminalShellExecution
+			let endDisposable = vscode.window.onDidEndTerminalShellExecution(event => {
+				if (event.execution === execution) {
+					endDisposable.dispose()
+					closeDisposable.dispose()
+					resolve(event.exitCode)
+				}
+			})
+			let closeDisposable = vscode.window.onDidCloseTerminal(closedTerminal => {
+				if (closedTerminal === terminal) {
+					endDisposable.dispose()
+					closeDisposable.dispose()
+					resolve(undefined)
+				}
+			})
+
+			try {
+				execution = shellIntegration.executeCommand(command)
+			}
+			catch (error) {
+				endDisposable.dispose()
+				closeDisposable.dispose()
+				reject(error)
+			}
+		})
 	}
 
 	private createTerminal(): vscode.Terminal {

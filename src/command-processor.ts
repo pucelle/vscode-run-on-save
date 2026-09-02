@@ -3,7 +3,7 @@ import {encodeCommandLineToBeQuotedIf} from './util'
 import {MinimatchOptions, Minimatch} from 'minimatch'
 import {CommandVariables} from './command-variables'
 import * as path from 'path'
-import {Configuration, PathSeparator, RawCommand, VSCodeDocumentPartial} from './types'
+import {Configuration, PathSeparator, RawCommand, TerminalReveal, VSCodeDocumentPartial} from './types'
 
 
 /** Processed command base, get extended by detailed command. */
@@ -34,6 +34,7 @@ export interface BackendCommand extends ProcessedCommandBase {
 
 export interface TerminalCommand extends ProcessedCommandBase {
 	runIn: 'terminal'
+	terminalReveal: TerminalReveal
 	statusMessageTimeout?: number
 	terminalHideTimeout?: number
 	clearOutput?: boolean
@@ -111,6 +112,7 @@ export class CommandProcessor {
 				preparedCommands.push({
 					runIn: 'terminal',
 					command: commandWithArgs,
+					terminalReveal: command.terminalReveal ?? (command.doNotDisturb ? 'never' : 'always'),
 					async: command.async ?? true,
 					clearOutput: command.clearOutput ?? false,
 					doNotDisturb: command.doNotDisturb ?? false,
